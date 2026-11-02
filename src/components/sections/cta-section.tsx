@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import type { CSSProperties } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import type { CTAContent } from "@/lib/sections";
@@ -17,7 +16,6 @@ export function CTASection({ content }: { content: CTAContent }) {
         isBanner ? "bg-background" : "bg-primary text-primary-foreground"
       }`}
     >
-      {/* Subtle gradient + pattern overlay */}
       {!isBanner && (
         <>
           <div
@@ -41,22 +39,6 @@ export function CTASection({ content }: { content: CTAContent }) {
       )}
 
       <div className="relative mx-auto max-w-5xl px-6 py-20 text-center lg:px-10 lg:py-28">
-        <motion.p
-          className={`story-chapter-eyebrow mb-8 justify-center ${
-            isBanner ? "" : "[&_.story-chapter-label]:text-primary-foreground/70 [&_.story-chapter-divider]:bg-primary-foreground/50"
-          }`}
-          style={isBanner ? undefined : ({ color: "inherit" } as CSSProperties)}
-          initial={reduce ? false : { opacity: 0, y: 12 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5 }}
-        >
-          <span className="story-chapter-index">07</span>
-          <span className="story-chapter-divider" />
-          <span className="story-chapter-label">NEXT</span>
-        </motion.p>
-
-        {/* Headline reveal */}
         <motion.h2
           className={`display-lg mx-auto max-w-3xl font-medium text-balance ${
             isBanner ? "" : "text-primary-foreground"

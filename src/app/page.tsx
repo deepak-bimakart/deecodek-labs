@@ -77,7 +77,7 @@ export default async function HomePage({
   return (
     <PublicShell>
       {access.isPreview ? <PreviewBadge /> : null}
-      <PageRenderer sections={page.sections} story />
+      <PageRenderer sections={page.sections} />
     </PublicShell>
   );
 }

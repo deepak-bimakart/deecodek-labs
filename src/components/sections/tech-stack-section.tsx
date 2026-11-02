@@ -50,13 +50,13 @@ export function TechStackSection({ content }: { content: TechStackContent }) {
         <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
           {/* Header */}
           <motion.div
-            className="max-w-3xl pt-8"
+            className="max-w-3xl"
             initial={reduce ? false : { opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           >
-            {c.eyebrow && <p className="mono-label mb-4">{c.eyebrow}</p>}
+            {c.eyebrow && <p className="eyebrow-lab mb-4">{c.eyebrow}</p>}
             <h2 className="display-lg font-medium text-balance">{c.heading}</h2>
           </motion.div>
 

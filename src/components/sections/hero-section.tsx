@@ -70,18 +70,17 @@ export function HeroSection({ content }: { content: HeroContent }) {
       <div className="relative z-10 mx-auto grid max-w-7xl items-center gap-12 px-6 py-16 lg:grid-cols-[1.05fr_1fr] lg:gap-16 lg:px-10 lg:py-24">
         {/* LEFT: copy column */}
         <motion.div style={{ y: reduce ? 0 : textY }} className="flex flex-col">
-          {/* Chapter hook eyebrow */}
-          <motion.p
-            className="story-chapter-eyebrow mb-6"
-            custom={0.1}
-            variants={fadeUp}
-            initial="hidden"
-            animate="show"
-          >
-            <span className="story-chapter-index">00</span>
-            <span className="story-chapter-divider" />
-            <span className="story-chapter-label">{c.eyebrow || "THE HOOK"}</span>
-          </motion.p>
+          {c.eyebrow && (
+            <motion.p
+              className="eyebrow-lab mb-6"
+              custom={0.1}
+              variants={fadeUp}
+              initial="hidden"
+              animate="show"
+            >
+              {c.eyebrow}
+            </motion.p>
+          )}
 
           {/* Headline — line by line with overflow mask */}
           <motion.h1

@@ -1,10 +1,9 @@
 "use client";
 
-import { useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import * as Icons from "lucide-react";
 import { ArrowUpRight } from "lucide-react";
 import { CAPABILITY_VISUALS } from "@/components/visuals/capability-visuals";
-import { StackingCards, StackingCard } from "@/components/motion/stacking-cards";
 import type { CapabilitiesGridContent } from "@/lib/sections";
 
 function getIcon(name: string) {
@@ -15,83 +14,87 @@ function getIcon(name: string) {
 export function CapabilitiesSection({ content }: { content: CapabilitiesGridContent }) {
   const reduce = useReducedMotion();
   const c = content;
+  const cols = Math.min(c.columns ?? 3, 3);
+
+  const container = {
+    hidden: {},
+    show: {
+      transition: {
+        staggerChildren: reduce ? 0 : 0.1,
+        delayChildren: 0.1,
+      },
+    },
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: reduce ? 0 : 24 },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
+    },
+  };
 
   return (
     <section className="relative border-b border-border bg-secondary/30">
-      <div className="mx-auto max-w-7xl px-6 pb-8 pt-20 lg:px-10 lg:pt-28">
-        <div className="max-w-3xl pt-8">
-          {c.eyebrow && <p className="eyebrow-lab mb-4">{c.eyebrow}</p>}
-          <h2 className="display-lg font-medium text-balance">{c.heading}</h2>
-          {c.subheading && (
-            <p className="mt-4 text-lg text-muted-foreground">{c.subheading}</p>
+      <div className="mx-auto max-w-7xl px-6 py-20 lg:px-10 lg:py-28">
+        <motion.div
+          className="max-w-3xl"
+          initial={reduce ? false : "hidden"}
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={container}
+        >
+          {c.eyebrow && (
+            <motion.p variants={item} className="eyebrow-lab mb-4">
+              {c.eyebrow}
+            </motion.p>
           )}
-        </div>
-      </div>
+          <motion.h2 variants={item} className="display-lg font-medium text-balance">
+            {c.heading}
+          </motion.h2>
+          {c.subheading && (
+            <motion.p variants={item} className="mt-4 text-lg text-muted-foreground">
+              {c.subheading}
+            </motion.p>
+          )}
+        </motion.div>
 
-      {reduce ? (
-        <div className="mx-auto max-w-7xl space-y-4 px-6 pb-20 lg:px-10 lg:pb-28">
+        <motion.div
+          className="mt-12 grid gap-3 sm:grid-cols-2"
+          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+          initial={reduce ? false : "hidden"}
+          whileInView="show"
+          viewport={{ once: true, margin: "-80px" }}
+          variants={container}
+        >
           {c.items.map((capItem, i) => {
             const Icon = getIcon(capItem.icon);
             const Visual = CAPABILITY_VISUALS[capItem.icon];
             return (
-              <div key={i} className="card-lab rounded-xl p-7 lg:p-10">
-                <div className="flex items-start justify-between">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-md border border-border bg-brand-soft text-primary">
-                    <Icon className="h-5 w-5" />
-                  </div>
-                  <span className="font-mono text-[10px] text-muted-foreground">
-                    {String(i + 1).padStart(2, "0")}
-                  </span>
-                </div>
-                <h3 className="mt-6 font-display text-2xl font-semibold tracking-tight">
-                  {capItem.title}
-                </h3>
-                <p className="mt-3 max-w-2xl text-muted-foreground">{capItem.description}</p>
-                {Visual && (
-                  <div className="mt-6 max-w-md opacity-70">
-                    <Visual />
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <StackingCards className="mx-auto max-w-7xl px-6 pb-[20vh] lg:px-10">
-          {c.items.map((capItem, i) => {
-            const Icon = getIcon(capItem.icon);
-            const Visual = CAPABILITY_VISUALS[capItem.icon];
-            return (
-              <StackingCard key={i} className="pb-8">
-                <div className="card-lab group relative min-h-[55vh] rounded-xl border border-border bg-background p-7 shadow-[0_-12px_40px_rgba(0,0,0,0.04)] lg:p-12">
+              <motion.div key={i} variants={item}>
+                <div className="card-lab group relative h-full rounded-xl p-7">
                   <div className="flex items-start justify-between">
                     <div className="flex h-12 w-12 items-center justify-center rounded-md border border-border bg-brand-soft text-primary">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                        {String(i + 1).padStart(2, "0")} / {String(c.items.length).padStart(2, "0")}
-                      </span>
-                      <ArrowUpRight className="h-4 w-4 text-muted-foreground/40 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
-                    </div>
+                    <ArrowUpRight className="h-4 w-4 text-muted-foreground/40 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-primary" />
                   </div>
-                  <h3 className="mt-10 font-display text-3xl font-semibold tracking-tight lg:text-4xl">
+                  <h3 className="mt-6 font-display text-lg font-semibold tracking-tight">
                     {capItem.title}
                   </h3>
-                  <p className="mt-4 max-w-2xl text-lg text-muted-foreground">
-                    {capItem.description}
-                  </p>
+                  <p className="mt-2 text-sm text-muted-foreground">{capItem.description}</p>
                   {Visual && (
-                    <div className="mt-8 max-w-lg opacity-60 transition-opacity duration-300 group-hover:opacity-90">
+                    <div className="mt-5 overflow-hidden opacity-50 transition-opacity duration-300 group-hover:opacity-90">
                       <Visual />
                     </div>
                   )}
                 </div>
-              </StackingCard>
+              </motion.div>
             );
           })}
-        </StackingCards>
-      )}
+        </motion.div>
+      </div>
     </section>
   );
 }
