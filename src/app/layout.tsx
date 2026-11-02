@@ -6,7 +6,9 @@ import { Toaster as SonnerToaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { AnalyticsScripts } from "@/components/analytics-scripts";
+import { SeoJsonLd } from "@/components/seo-json-ld";
 import { db } from "@/lib/db";
+import { SITE_NAME, SITE_URL } from "@/lib/seo";
 
 async function getAnalyticsSettings(): Promise<{
   gaId: string | null;
@@ -53,12 +55,13 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "DeeCodeK Labs — Software Studio. Product Lab.",
     template: "%s · DeeCodeK Labs",
   },
   description:
-    "Custom products, scalable backends, and useful tools engineered for the real world. Software studio and product lab.",
+    "Custom products, scalable backends, and useful tools engineered for the real world. Software studio and product lab based in India.",
   keywords: [
     "DeeCodeK Labs",
     "software studio",
@@ -67,21 +70,50 @@ export const metadata: Metadata = {
     "open source",
     "Flutter apps",
     "SaaS",
+    "NestJS",
+    "Next.js agency India",
   ],
-  authors: [{ name: "DeeCodeK Labs" }],
-  icons: { icon: "/logo-light.png" },
+  authors: [{ name: SITE_NAME, url: SITE_URL }],
+  creator: SITE_NAME,
+  publisher: SITE_NAME,
+  category: "technology",
+  icons: { icon: "/logo-light.png", apple: "/logo-light.png" },
+  alternates: {
+    canonical: "/",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
     title: "DeeCodeK Labs — Software Studio. Product Lab.",
     description:
       "Custom products, scalable backends, and useful tools engineered for the real world.",
-    url: "https://deecodeklabs.com",
-    siteName: "DeeCodeK Labs",
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    locale: "en_IN",
     type: "website",
+    images: [
+      {
+        url: "/logo-light.png",
+        width: 512,
+        height: 512,
+        alt: "DeeCodeK Labs",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "DeeCodeK Labs",
     description: "Software Studio. Product Lab.",
+    images: ["/logo-light.png"],
   },
 };
 
@@ -92,6 +124,9 @@ export default async function RootLayout({
 
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <SeoJsonLd />
+      </head>
       <body
         className={`${spaceGrotesk.variable} ${dmSans.variable} ${plexMono.variable} font-sans antialiased bg-background text-foreground`}
       >

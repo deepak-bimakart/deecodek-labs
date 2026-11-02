@@ -32,6 +32,13 @@ export type SeoFallbacks = {
   image?: string | null;
 };
 
+function absoluteUrl(url: string | null | undefined): string | undefined {
+  if (!url) return undefined;
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  const base = SITE_URL.replace(/\/$/, "");
+  return `${base}${url.startsWith("/") ? url : `/${url}`}`;
+}
+
 export function buildPageMetadata(
   seo: Partial<SeoMetadata> | null | undefined,
   fallbacks: SeoFallbacks
@@ -44,11 +51,14 @@ export function buildPageMetadata(
   const canonical =
     seo?.canonicalUrl ||
     (fallbacks.path
-      ? `${SITE_URL}${fallbacks.path.startsWith("/") ? fallbacks.path : `/${fallbacks.path}`}`
+      ? `${SITE_URL.replace(/\/$/, "")}${fallbacks.path.startsWith("/") ? fallbacks.path : `/${fallbacks.path}`}`
       : undefined);
   const ogTitle = seo?.ogTitle || title;
   const ogDescription = seo?.ogDescription || description;
-  const ogImage = seo?.ogImage || fallbacks.image || undefined;
+  const ogImage =
+    absoluteUrl(seo?.ogImage) ||
+    absoluteUrl(fallbacks.image) ||
+    absoluteUrl("/logo-light.png");
   const index = seo?.robotsIndex ?? true;
   const follow = seo?.robotsFollow ?? true;
 
@@ -63,7 +73,7 @@ export function buildPageMetadata(
       url: canonical || SITE_URL,
       siteName: SITE_NAME,
       type: "website",
-      images: ogImage ? [{ url: ogImage }] : undefined,
+      images: ogImage ? [{ url: ogImage, alt: title }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
