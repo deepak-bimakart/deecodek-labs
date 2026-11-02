@@ -77,6 +77,9 @@ export const metadata: Metadata = {
   creator: SITE_NAME,
   publisher: SITE_NAME,
   category: "technology",
+  verification: {
+    google: "7yf3lk44AjMw2D6lZ8-gHB_tkQUcV1xp7zTG48Jqtjk",
+  },
   icons: { icon: "/logo-light.png", apple: "/logo-light.png" },
   alternates: {
     canonical: "/",
