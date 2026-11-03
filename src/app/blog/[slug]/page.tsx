@@ -15,6 +15,8 @@ import ReactMarkdown from "react-markdown";
 import { buildBlogPostingJsonLd } from "@/lib/json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 import { resolveContentAccess } from "@/lib/preview";
+import { relatedServicesForPost } from "@/lib/related-content";
+import { ArrowUpRight } from "lucide-react";
 
 export const revalidate = 60;
 
@@ -69,18 +71,27 @@ export default async function BlogDetailPage({
   });
   if (!post || !access.allow) notFound();
 
-  const related = post.categoryId
-    ? await db.blogPost.findMany({
-        where: {
-          status: "PUBLISHED",
-          categoryId: post.categoryId,
-          id: { not: post.id },
-        },
-        take: 3,
-        orderBy: { publishedAt: "desc" },
-        include: { category: true, author: true },
-      })
-    : [];
+  const [related, relatedServices] = await Promise.all([
+    post.categoryId
+      ? db.blogPost.findMany({
+          where: {
+            status: "PUBLISHED",
+            categoryId: post.categoryId,
+            id: { not: post.id },
+          },
+          take: 3,
+          orderBy: { publishedAt: "desc" },
+          include: { category: true, author: true },
+        })
+      : Promise.resolve([]),
+    relatedServicesForPost({
+      title: post.title,
+      excerpt: post.excerpt,
+      categoryName: post.category?.name,
+      tagNames: post.tags.map((t) => t.tag.name),
+      take: 3,
+    }),
+  ]);
 
   const blogJsonLd = buildBlogPostingJsonLd({
     title: post.title,
@@ -200,15 +211,51 @@ export default async function BlogDetailPage({
           </StoryChapter>
         )}
 
+        {relatedServices.length > 0 && (
+          <StoryChapter
+            id="chapter-services"
+            index="06"
+            label="SERVICES"
+            className="border-b border-border bg-secondary/30"
+          >
+            <div className="mx-auto max-w-3xl px-6 pb-16 pt-4 lg:px-10">
+              <Reveal>
+                <h2 className="font-display text-2xl font-semibold">Related services</h2>
+                <p className="mt-2 text-muted-foreground">
+                  If this topic is on your roadmap, here is how we ship it in production.
+                </p>
+              </Reveal>
+              <ul className="mt-8 space-y-4">
+                {relatedServices.map((s, i) => (
+                  <Reveal key={s.id} delay={i * 0.06}>
+                    <li className="border-b border-border pb-4 last:border-0">
+                      <Link
+                        href={`/services/${s.slug}`}
+                        className="group inline-flex items-center gap-1.5 font-display text-lg font-semibold hover:text-primary"
+                      >
+                        {s.title}
+                        <ArrowUpRight className="h-4 w-4 opacity-60 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                      </Link>
+                      {s.summary && (
+                        <p className="mt-1 text-sm text-muted-foreground">{s.summary}</p>
+                      )}
+                    </li>
+                  </Reveal>
+                ))}
+              </ul>
+            </div>
+          </StoryChapter>
+        )}
+
         <StoryCloseCta
-          index="06"
+          index="07"
           label="CLOSE"
           heading="Want to build with us?"
           subheading="Start a conversation about the problem you're solving."
         />
 
         {related.length > 0 && (
-          <StoryChapter id="chapter-related" index="07" label="RELATED" className="border-b border-border bg-background">
+          <StoryChapter id="chapter-related" index="08" label="RELATED" className="border-b border-border bg-background">
             <div className="mx-auto max-w-7xl px-6 pb-16 pt-4 lg:px-10">
               <Reveal>
                 <h2 className="font-display text-2xl font-semibold">Continue reading</h2>

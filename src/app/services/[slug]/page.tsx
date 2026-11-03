@@ -14,6 +14,7 @@ import { CustomJsonLd, JsonLd } from "@/components/seo-json-ld";
 import { buildServiceJsonLd } from "@/lib/json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 import { resolveContentAccess } from "@/lib/preview";
+import { relatedWorkAndProductsForService } from "@/lib/related-content";
 
 export const revalidate = 60;
 
@@ -66,6 +67,16 @@ export default async function ServiceDetailPage({
     technologies = JSON.parse(service.technologies ?? "[]");
     capabilities = JSON.parse(service.capabilities ?? "[]");
   } catch {}
+
+  const { work: relatedWork, products: relatedProducts } =
+    await relatedWorkAndProductsForService({
+      title: service.title,
+      summary: service.summary,
+      description: service.description,
+      technologies,
+      takeWork: 3,
+      takeProducts: 2,
+    });
 
   const serviceJsonLd = buildServiceJsonLd({
     title: service.title,
@@ -143,7 +154,7 @@ export default async function ServiceDetailPage({
                     ))}
                   </ul>
                 </div>
-                <div className="border-t border-border pt-6">
+                <div className="space-y-3 border-t border-border pt-6">
                   <Link
                     href="/contact"
                     className="group inline-flex items-center gap-1.5 rounded-md bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground"
@@ -151,14 +162,86 @@ export default async function ServiceDetailPage({
                     Build with us{" "}
                     <ArrowUpRight className="h-4 w-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
                   </Link>
+                  <div className="flex flex-wrap gap-3 text-sm">
+                    <Link href="/work" className="text-muted-foreground hover:text-primary">
+                      See related work →
+                    </Link>
+                    <Link href="/products" className="text-muted-foreground hover:text-primary">
+                      Studio products →
+                    </Link>
+                  </div>
                 </div>
               </aside>
             </Reveal>
           </div>
         </StoryChapter>
 
+        {(relatedWork.length > 0 || relatedProducts.length > 0) && (
+          <StoryChapter
+            id="chapter-proof"
+            index="03"
+            label="PROOF"
+            className="border-b border-border bg-secondary/30"
+          >
+            <div className="mx-auto max-w-7xl px-6 pb-16 pt-4 lg:px-10">
+              <Reveal>
+                <h2 className="font-display text-2xl font-semibold">Related work & products</h2>
+                <p className="mt-2 max-w-2xl text-muted-foreground">
+                  Examples of systems and products adjacent to this service lane.
+                </p>
+              </Reveal>
+              <div className="mt-10 grid gap-10 lg:grid-cols-2">
+                {relatedWork.length > 0 && (
+                  <div>
+                    <p className="mono-label mb-4">Work</p>
+                    <ul className="space-y-4">
+                      {relatedWork.map((p) => (
+                        <li key={p.id} className="border-b border-border pb-4 last:border-0">
+                          <Link
+                            href={`/work/${p.slug}`}
+                            className="group inline-flex items-center gap-1.5 font-display text-lg font-semibold hover:text-primary"
+                          >
+                            {p.name}
+                            <ArrowUpRight className="h-4 w-4 opacity-60 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                          </Link>
+                          {p.summary && (
+                            <p className="mt-1 text-sm text-muted-foreground">{p.summary}</p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                {relatedProducts.length > 0 && (
+                  <div>
+                    <p className="mono-label mb-4">Products</p>
+                    <ul className="space-y-4">
+                      {relatedProducts.map((p) => (
+                        <li key={p.id} className="border-b border-border pb-4 last:border-0">
+                          <Link
+                            href={`/products/${p.slug}`}
+                            className="group inline-flex items-center gap-1.5 font-display text-lg font-semibold hover:text-primary"
+                          >
+                            {p.name}
+                            <ArrowUpRight className="h-4 w-4 opacity-60 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                          </Link>
+                          {(p.tagline || p.summary) && (
+                            <p className="mt-1 text-sm text-muted-foreground">
+                              {p.tagline || p.summary}
+                            </p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </StoryChapter>
+        )}
+
         <StoryCloseCta
-          index="03"
+          index="04"
           label="CLOSE"
           heading="This the lane you need?"
           subheading="Tell us the constraint. We'll map the first six weeks."

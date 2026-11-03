@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { db } from "@/lib/db";
 import { PublicShell } from "@/components/public/shell";
 import { PageHero } from "@/components/public/page-hero";
@@ -6,6 +7,7 @@ import { Reveal, Counter } from "@/components/motion/motion";
 import { CustomJsonLd, JsonLd } from "@/components/seo-json-ld";
 import { buildFaqPageJsonLd } from "@/lib/json-ld";
 import { buildPageMetadata } from "@/lib/seo";
+import { getAboutFounder } from "@/lib/about-founder";
 
 export const revalidate = 60;
 
@@ -22,26 +24,46 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function AboutPage() {
-  const services = await db.service.findMany({
-    where: { status: "PUBLISHED", isFeatured: true },
-    orderBy: { sortOrder: "asc" },
-    take: 4,
-  });
-  const page = await db.page.findUnique({
-    where: { slug: "about" },
-    include: { seo: true },
-  });
-  const faqs = await db.faq.findMany({
-    where: { status: "PUBLISHED" },
-    orderBy: { sortOrder: "asc" },
-  });
+  const [services, page, faqs, founder] = await Promise.all([
+    db.service.findMany({
+      where: { status: "PUBLISHED", isFeatured: true },
+      orderBy: { sortOrder: "asc" },
+      take: 4,
+    }),
+    db.page.findUnique({
+      where: { slug: "about" },
+      include: { seo: true },
+    }),
+    db.faq.findMany({
+      where: { status: "PUBLISHED" },
+      orderBy: { sortOrder: "asc" },
+    }),
+    getAboutFounder(),
+  ]);
+
   const faqJsonLd = buildFaqPageJsonLd(
     faqs.map((f) => ({ question: f.question, answer: f.answer }))
   );
 
+  const personJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    name: founder.name,
+    jobTitle: "Founder",
+    worksFor: {
+      "@type": "Organization",
+      name: "DeeCodeK Labs",
+      url: "https://deecodeklabs.com",
+    },
+    description: founder.bio,
+    ...(founder.url ? { url: founder.url } : {}),
+    ...(founder.photo ? { image: founder.photo } : {}),
+  };
+
   return (
     <PublicShell>
       {faqJsonLd ? <JsonLd data={faqJsonLd} /> : null}
+      <JsonLd data={personJsonLd} />
       <CustomJsonLd raw={page?.seo?.structuredData} />
       <PageHero
         eyebrow="About"
@@ -50,7 +72,58 @@ export default async function AboutPage() {
         bgImage="/images/hero/architecture.png"
       />
 
-      <section className="border-b border-border bg-secondary/30">
+      <section className="border-b border-border bg-secondary/30" aria-labelledby="founder-heading">
+        <div className="mx-auto max-w-4xl px-6 py-16 lg:px-10 lg:py-24">
+          <Reveal>
+            <p className="mono-label mb-3">E-E-A-T · Founder</p>
+            <h2 id="founder-heading" className="font-display text-3xl font-semibold">
+              Who builds this
+            </h2>
+          </Reveal>
+          <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-start">
+            {founder.photo ? (
+              <Reveal>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={founder.photo}
+                  alt={founder.name}
+                  className="h-36 w-36 shrink-0 object-cover border border-border"
+                />
+              </Reveal>
+            ) : (
+              <Reveal>
+                <div
+                  className="flex h-36 w-36 shrink-0 items-center justify-center border border-border bg-background font-display text-4xl font-semibold text-primary"
+                  aria-hidden
+                >
+                  {founder.name.slice(0, 1).toUpperCase()}
+                </div>
+              </Reveal>
+            )}
+            <Reveal delay={0.1}>
+              <div className="space-y-3">
+                <h3 className="font-display text-2xl font-semibold">{founder.name}</h3>
+                <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Founder · DeeCodeK Labs
+                </p>
+                <p className="text-pretty text-lg leading-relaxed text-muted-foreground">
+                  {founder.bio}
+                </p>
+                {founder.url && (
+                  <Link
+                    href={founder.url}
+                    className="inline-flex text-sm text-primary underline-offset-4 hover:underline"
+                  >
+                    More about the studio
+                  </Link>
+                )}
+              </div>
+            </Reveal>
+          </div>
+        </div>
+      </section>
+
+      <section className="border-b border-border bg-background">
         <div className="mx-auto max-w-4xl px-6 py-16 lg:px-10 lg:py-24">
           <div className="space-y-6">
             <h2 className="font-display text-3xl font-semibold">How we work</h2>
@@ -95,7 +168,7 @@ export default async function AboutPage() {
       </section>
 
       {services.length > 0 && (
-        <section className="border-b border-border bg-background">
+        <section className="border-b border-border bg-secondary/30">
           <div className="mx-auto max-w-4xl px-6 py-16 lg:px-10 lg:py-24">
             <Reveal>
               <h2 className="font-display text-3xl font-semibold">What we ship</h2>
@@ -108,7 +181,11 @@ export default async function AboutPage() {
                       {String(s.sortOrder).padStart(2, "0")}
                     </span>
                     <div>
-                      <h3 className="font-display text-lg font-semibold">{s.title}</h3>
+                      <h3 className="font-display text-lg font-semibold">
+                        <Link href={`/services/${s.slug}`} className="hover:text-primary">
+                          {s.title}
+                        </Link>
+                      </h3>
                       <p className="text-sm text-muted-foreground">{s.summary}</p>
                     </div>
                   </li>
@@ -120,7 +197,7 @@ export default async function AboutPage() {
       )}
 
       {faqs.length > 0 && (
-        <section className="border-b border-border bg-secondary/30">
+        <section className="border-b border-border bg-background">
           <div className="mx-auto max-w-3xl px-6 py-16 lg:px-10 lg:py-24">
             <Reveal>
               <h2 className="display-lg font-medium">Common questions</h2>

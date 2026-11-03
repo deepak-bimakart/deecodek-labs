@@ -3,6 +3,23 @@
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useRef, ReactNode } from "react";
 
+/** Split title for staged reveal without eating spaces inside each line. */
+function splitHeroTitle(title: string): string[] {
+  const normalized = title.replace(/\r\n/g, "\n").trim();
+  if (!normalized) return [title];
+  if (normalized.includes("\n")) {
+    return normalized
+      .split(/\n+/)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .slice(0, 4);
+  }
+  // Split after `.` or `:` only when followed by whitespace (lookbehind keeps punctuation).
+  const parts = normalized.split(/(?<=[.:])\s+/).filter((p) => p.length > 0);
+  if (parts.length <= 1) return [normalized];
+  return parts.slice(0, 4);
+}
+
 /** Story intro chapter for listing / detail pages — brand-first, quieter motion. */
 export function PageHero({
   eyebrow,
@@ -30,8 +47,8 @@ export function PageHero({
   const bgY = useTransform(scrollYProgress, [0, 1], ["0%", "18%"]);
   const contentY = useTransform(scrollYProgress, [0, 1], ["0%", reduce ? "0%" : "10%"]);
 
-  const lines = title.split(/(?<=\.)\s+|(?<=:)\s+/).filter(Boolean);
-  const titleLines = lines.length > 1 ? lines.slice(0, 4) : [title];
+  // Split only on sentence/colon boundaries; keep intra-line spaces intact (no space-glue).
+  const titleLines = splitHeroTitle(title);
   const label = chapterLabel || eyebrow || "INTRO";
 
   return (

@@ -162,6 +162,49 @@ export function SettingsManager({
                 />
               </div>
             </div>
+            <div className="border-t border-border pt-4">
+              <p className="mb-3 font-display text-sm font-semibold">About · Founder (E-E-A-T)</p>
+              <p className="mb-4 text-xs text-muted-foreground">
+                Keys: <code className="font-mono">about.founder.name</code>,{" "}
+                <code className="font-mono">bio</code>, <code className="font-mono">photo</code>,{" "}
+                <code className="font-mono">url</code>. Empty values fall back to Deepak / DeeCodeK Labs placeholders.
+              </p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-1.5">
+                  <Label>Founder name</Label>
+                  <Input
+                    value={settings["about.founder.name"] ?? ""}
+                    onChange={(e) => update("about.founder.name", e.target.value)}
+                    placeholder="Deepak"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Founder URL</Label>
+                  <Input
+                    value={settings["about.founder.url"] ?? ""}
+                    onChange={(e) => update("about.founder.url", e.target.value)}
+                    placeholder="https://deecodeklabs.com/about"
+                  />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label>Founder photo URL</Label>
+                  <Input
+                    value={settings["about.founder.photo"] ?? ""}
+                    onChange={(e) => update("about.founder.photo", e.target.value)}
+                    placeholder="/media/founder.jpg"
+                  />
+                </div>
+                <div className="space-y-1.5 sm:col-span-2">
+                  <Label>Founder bio</Label>
+                  <Textarea
+                    value={settings["about.founder.bio"] ?? ""}
+                    onChange={(e) => update("about.founder.bio", e.target.value)}
+                    className="min-h-[96px]"
+                    placeholder="Founder of DeeCodeK Labs…"
+                  />
+                </div>
+              </div>
+            </div>
           </Card>
         </TabsContent>
 
