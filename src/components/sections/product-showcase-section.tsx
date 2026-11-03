@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
 import type { Product, ProductFeature } from "@prisma/client";
@@ -16,8 +17,8 @@ const STATUS_TONES: Record<string, { label: string; tone: string }> = {
 };
 
 const PRODUCT_IMAGES: Record<string, string> = {
-  marketflow: "/images/products/marketflow-dashboard.png",
-  sadika: "/images/products/sadika-app.png",
+  marketflow: "/images/optimized/products/marketflow-dashboard.jpg",
+  sadika: "/images/optimized/products/sadika-app.jpg",
 };
 
 export function ProductShowcaseSection({
@@ -35,18 +36,18 @@ export function ProductShowcaseSection({
     hidden: {},
     show: {
       transition: {
-        staggerChildren: reduce ? 0 : 0.12,
+        staggerChildren: reduce ? 0 : 0.1,
         delayChildren: 0.05,
       },
     },
   };
 
   const item = {
-    hidden: { opacity: 0, y: reduce ? 0 : 28 },
+    hidden: { opacity: 0, y: reduce ? 0 : 20 },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] as const },
+      transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] as const },
     },
   };
 
@@ -96,20 +97,23 @@ export function ProductShowcaseSection({
                   >
                     <div className="relative aspect-[16/10] overflow-hidden bg-muted">
                       {imageSrc ? (
-                        <motion.div
-                          className="absolute inset-0"
-                          initial={reduce ? false : { clipPath: "inset(0 100% 0 0)" }}
-                          whileInView={{ clipPath: "inset(0% 0% 0% 0%)" }}
-                          viewport={{ once: true, margin: "-60px" }}
-                          transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }}
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                        imageSrc.startsWith("/") ? (
+                          <Image
+                            src={imageSrc}
+                            alt={`${product.name} — ${product.tagline ?? "product preview"}`}
+                            fill
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                            className="object-cover transition-transform duration-500 group-hover:scale-105"
+                            quality={75}
+                          />
+                        ) : (
+                          // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={imageSrc}
                             alt={`${product.name} — ${product.tagline ?? "product preview"}`}
                             className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
-                        </motion.div>
+                        )
                       ) : (
                         <div className="flex h-full items-center justify-center text-muted-foreground">
                           <span className="font-mono text-xs">{product.category}</span>

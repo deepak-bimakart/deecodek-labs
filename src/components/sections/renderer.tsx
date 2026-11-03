@@ -1,28 +1,34 @@
+import dynamic from "next/dynamic";
 import { db } from "@/lib/db";
 import type { PageSection, Product, ProductFeature, Service, Project, BlogPost, BlogCategory, User } from "@prisma/client";
+<<<<<<< HEAD
 import { JsonLd } from "@/components/seo-json-ld";
 import { buildFaqPageJsonLd } from "@/lib/json-ld";
+=======
+// Hero stays eagerly loaded - above-fold LCP path
+>>>>>>> origin/seo/phase-3-cwv
 import {
   HeroSection as HeroClient,
 } from "@/components/sections/hero-section";
-import {
-  CapabilitiesSection as CapabilitiesClient,
-} from "@/components/sections/capabilities-section";
-import {
-  ProductShowcaseSection as ProductShowcaseClient,
-} from "@/components/sections/product-showcase-section";
-import {
-  ProcessTimelineSection as ProcessTimelineClient,
-} from "@/components/sections/process-timeline-section";
-import {
-  TechStackSection as TechStackClient,
-} from "@/components/sections/tech-stack-section";
-import {
-  EditorialTextSection as EditorialTextClient,
-} from "@/components/sections/editorial-text-section";
-import {
-  CTASection as CTAClient,
-} from "@/components/sections/cta-section";
+// Below-fold homepage sections - separate client chunks
+const CapabilitiesClient = dynamic(() =>
+  import("@/components/sections/capabilities-section").then((m) => m.CapabilitiesSection)
+);
+const ProductShowcaseClient = dynamic(() =>
+  import("@/components/sections/product-showcase-section").then((m) => m.ProductShowcaseSection)
+);
+const ProcessTimelineClient = dynamic(() =>
+  import("@/components/sections/process-timeline-section").then((m) => m.ProcessTimelineSection)
+);
+const TechStackClient = dynamic(() =>
+  import("@/components/sections/tech-stack-section").then((m) => m.TechStackSection)
+);
+const EditorialTextClient = dynamic(() =>
+  import("@/components/sections/editorial-text-section").then((m) => m.EditorialTextSection)
+);
+const CTAClient = dynamic(() =>
+  import("@/components/sections/cta-section").then((m) => m.CTASection)
+);
 import {
   ServicesListContent,
   ProductShowcaseContent,
