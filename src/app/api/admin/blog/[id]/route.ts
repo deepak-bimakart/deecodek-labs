@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getCurrentUser, audit, can } from "@/lib/rbac";
 import { nestedSeoSchema } from "@/lib/seo";
 import { upsertSeoRecord } from "@/lib/attach-seo";
+import { createSlugChangeRedirect } from "@/lib/slug-redirect";
 
 const postUpdateSchema = z.object({
   title: z.string().min(1).max(300).optional(),
@@ -40,15 +42,21 @@ export async function PATCH(
   const data: any = { ...rest };
   if (publishedAt !== undefined) data.publishedAt = publishedAt ? new Date(publishedAt) : null;
 
+  const existing = await db.blogPost.findUnique({
+    where: { id },
+    select: { slug: true, status: true, seoId: true, publishedAt: true, title: true },
+  });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   // When publishing, ensure publishedAt is set
   if (rest.status === "PUBLISHED" && publishedAt === undefined) {
-    const existing = await db.blogPost.findUnique({ where: { id }, select: { publishedAt: true } });
-    if (!existing?.publishedAt) data.publishedAt = new Date();
+    if (!existing.publishedAt) data.publishedAt = new Date();
   }
 
   if (seo !== undefined) {
-    const existing = await db.blogPost.findUnique({ where: { id }, select: { seoId: true } });
-    const seoId = await upsertSeoRecord(existing?.seoId, seo);
+    const seoId = await upsertSeoRecord(existing.seoId, seo, {
+      fallbackTitle: rest.title ?? existing.title,
+    });
     if (seoId !== undefined) data.seoId = seoId;
   }
 
@@ -67,6 +75,23 @@ export async function PATCH(
     data,
     include: { category: true, tags: { include: { tag: true } }, seo: true },
   });
+
+  if (rest.slug && rest.slug !== existing.slug) {
+    const willBePublic =
+      (rest.status ?? existing.status) === "PUBLISHED" || post.status === "PUBLISHED";
+    await createSlugChangeRedirect({
+      kind: "blog",
+      oldSlug: existing.slug,
+      newSlug: rest.slug,
+      isPublic: willBePublic,
+    });
+  }
+
+  revalidatePath("/blog");
+  revalidatePath(`/blog/${post.slug}`);
+  if (rest.slug && rest.slug !== existing.slug) {
+    revalidatePath(`/blog/${existing.slug}`);
+  }
 
   await audit({ action: "update", entityType: "blog_post", entityId: id, userId: user.id });
   return NextResponse.json({ post });

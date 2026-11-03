@@ -348,18 +348,24 @@ model SiteSetting {
 }
 
 model SeoMetadata {
-  id              String   @id @default(cuid())
-  metaTitle       String?
-  metaDescription String?
-  canonicalUrl    String?
-  ogTitle         String?
-  ogDescription   String?
-  ogImage         String?
-  robotsIndex     Boolean  @default(true)
-  robotsFollow    Boolean  @default(true)
-  structuredData  String?  // JSON string
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id                String   @id @default(cuid())
+  metaTitle         String?
+  metaDescription   String?
+  canonicalUrl      String?
+  ogTitle           String?
+  ogDescription     String?
+  ogImage           String?
+  robotsIndex       Boolean  @default(true)
+  robotsFollow      Boolean  @default(true)
+  structuredData    String?  // JSON string (custom JSON-LD)
+  focusKeyword      String?
+  secondaryKeywords String?
+  schemaType        String?  // e.g. Article, Service, Product, WebPage, FAQPage, custom
+  breadcrumbLabel   String?
+  includeInSitemap  Boolean  @default(true)
+  seoScore          Int?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   pages     Page[]
   services  Service[]
@@ -369,12 +375,25 @@ model SeoMetadata {
 }
 
 model Redirect {
-  id        String   @id @default(cuid())
-  fromPath  String   @unique
-  toPath    String
-  statusCode Int     @default(301)
-  isActive  Boolean  @default(true)
-  createdAt DateTime @default(now())
+  id         String   @id @default(cuid())
+  fromPath   String   @unique
+  toPath     String
+  statusCode Int      @default(301)
+  isActive   Boolean  @default(true)
+  hitCount   Int      @default(0)
+  createdAt  DateTime @default(now())
+}
+
+model NotFoundHit {
+  id           String   @id @default(cuid())
+  path         String   @unique
+  count        Int      @default(1)
+  lastReferrer String?
+  updatedAt    DateTime @updatedAt
+  createdAt    DateTime @default(now())
+
+  @@index([count])
+  @@index([updatedAt])
 }
 
 // ────────────────────────────────────────────────────────────────────────────

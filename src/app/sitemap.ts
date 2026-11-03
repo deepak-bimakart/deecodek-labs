@@ -14,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         slug: true,
         updatedAt: true,
         isHomepage: true,
-        seo: { select: { robotsIndex: true } },
+        seo: { select: { robotsIndex: true, includeInSitemap: true } },
       },
     }),
     db.service.findMany({
@@ -22,7 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: {
         slug: true,
         updatedAt: true,
-        seo: { select: { robotsIndex: true } },
+        seo: { select: { robotsIndex: true, includeInSitemap: true } },
       },
     }),
     db.product.findMany({
@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: {
         slug: true,
         updatedAt: true,
-        seo: { select: { robotsIndex: true } },
+        seo: { select: { robotsIndex: true, includeInSitemap: true } },
       },
     }),
     db.project.findMany({
@@ -38,7 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       select: {
         slug: true,
         updatedAt: true,
-        seo: { select: { robotsIndex: true } },
+        seo: { select: { robotsIndex: true, includeInSitemap: true } },
       },
     }),
     db.blogPost.findMany({
@@ -47,13 +47,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         slug: true,
         updatedAt: true,
         publishedAt: true,
-        seo: { select: { robotsIndex: true } },
+        seo: { select: { robotsIndex: true, includeInSitemap: true } },
       },
     }),
   ]);
 
-  const indexable = <T extends { seo: { robotsIndex: boolean } | null }>(row: T) =>
-    row.seo?.robotsIndex !== false;
+  const indexable = <
+    T extends { seo: { robotsIndex: boolean; includeInSitemap: boolean } | null },
+  >(
+    row: T
+  ) => row.seo?.robotsIndex !== false && row.seo?.includeInSitemap !== false;
 
   const home = pages.find((p) => p.isHomepage || p.slug === "home");
   const about = pages.find((p) => p.slug === "about");

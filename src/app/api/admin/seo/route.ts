@@ -13,7 +13,9 @@ const seoSchema = seoFieldsSchema.extend({
 export async function GET() {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!can(user.role, "settings.view")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!can(user.role, "seo.view") && !can(user.role, "settings.view")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const seoRecords = await db.seoMetadata.findMany({
     orderBy: { updatedAt: "desc" },
@@ -31,7 +33,9 @@ export async function GET() {
 export async function POST(req: Request) {
   const user = await getCurrentUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (!can(user.role, "settings.update")) return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  if (!can(user.role, "seo.manage") && !can(user.role, "settings.update")) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   const body = await req.json();
   const parsed = seoSchema.safeParse(body);

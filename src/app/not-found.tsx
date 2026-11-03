@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { PublicShell } from "@/components/public/shell";
+import { NotFoundHitLogger } from "@/components/not-found-hit-logger";
 
 export const metadata: Metadata = {
   title: "Page not found",
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <PublicShell>
+      <NotFoundHitLogger />
       <section className="border-b border-border bg-background">
         <div className="mx-auto max-w-3xl px-6 py-24 text-center lg:px-10 lg:py-32">
           <p className="font-mono text-xs uppercase tracking-[0.18em] text-primary">404</p>

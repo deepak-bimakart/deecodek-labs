@@ -25,6 +25,7 @@ const HASH_TO_TAB: Record<string, string> = {
   testimonials: "content",
   analytics: "analytics",
   opensource: "opensource",
+  seo: "seo",
 };
 
 type NavMenu = {
@@ -131,6 +132,7 @@ export function SettingsManager({
           <TabsTrigger value="list-heroes">List pages</TabsTrigger>
           <TabsTrigger value="opensource">Open Source</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="seo">SEO</TabsTrigger>
           <TabsTrigger value="content">FAQs & Testimonials</TabsTrigger>
         </TabsList>
 
@@ -421,6 +423,96 @@ export function SettingsManager({
                 <p className="text-xs text-muted-foreground">
                   Key: <code className="font-mono">analytics.plausibleDomain</code>
                 </p>
+              </div>
+            </div>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="seo" id="seo">
+          <Card className="space-y-4 p-6">
+            <p className="text-sm text-muted-foreground">
+              Global SEO defaults used by the root layout and public metadata. Entity-level SEO
+              still overrides per page.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Site name</Label>
+                <Input
+                  value={settings["seo.siteName"] ?? ""}
+                  onChange={(e) => update("seo.siteName", e.target.value)}
+                  placeholder="DeeCodeK Labs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Title template</Label>
+                <Input
+                  value={settings["seo.titleTemplate"] ?? ""}
+                  onChange={(e) => update("seo.titleTemplate", e.target.value)}
+                  placeholder="%s · DeeCodeK Labs"
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Default meta description</Label>
+                <Textarea
+                  value={settings["seo.defaultDescription"] ?? ""}
+                  onChange={(e) => update("seo.defaultDescription", e.target.value)}
+                  className="min-h-[72px]"
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Default OG image URL</Label>
+                <Input
+                  value={settings["seo.defaultOgImage"] ?? ""}
+                  onChange={(e) => update("seo.defaultOgImage", e.target.value)}
+                  placeholder="/logo-light.png"
+                />
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Organization address</Label>
+                <Input
+                  value={settings["seo.orgAddress"] ?? ""}
+                  onChange={(e) => update("seo.orgAddress", e.target.value)}
+                  placeholder="City, Country"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Organization email</Label>
+                <Input
+                  type="email"
+                  value={settings["seo.orgEmail"] ?? settings["brand.email"] ?? ""}
+                  onChange={(e) => update("seo.orgEmail", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Google Search Console verification</Label>
+                <Input
+                  value={settings["seo.verification.google"] ?? ""}
+                  onChange={(e) => update("seo.verification.google", e.target.value)}
+                  placeholder="content token from meta tag"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Key: <code className="font-mono">seo.verification.google</code>
+                </p>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Bing Webmaster verification</Label>
+                <Input
+                  value={settings["seo.verification.bing"] ?? ""}
+                  onChange={(e) => update("seo.verification.bing", e.target.value)}
+                  placeholder="msvalidate.01 token"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Key: <code className="font-mono">seo.verification.bing</code>
+                </p>
+              </div>
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label>Default robots notes</Label>
+                <Textarea
+                  value={settings["seo.robotsNotes"] ?? ""}
+                  onChange={(e) => update("seo.robotsNotes", e.target.value)}
+                  className="min-h-[72px]"
+                  placeholder="Internal notes for robots / crawl policy (not emitted publicly)."
+                />
               </div>
             </div>
           </Card>

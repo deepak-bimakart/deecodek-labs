@@ -20,6 +20,12 @@ export const seoFieldsSchema = z.object({
   robotsIndex: z.boolean().optional(),
   robotsFollow: z.boolean().optional(),
   structuredData: zNullableString,
+  focusKeyword: zNullableString,
+  secondaryKeywords: zNullableString,
+  schemaType: zNullableString,
+  breadcrumbLabel: zNullableString,
+  includeInSitemap: z.boolean().optional(),
+  seoScore: z.number().int().min(0).max(100).optional().nullable(),
 });
 
 /** Nested SEO payload on entity create/update. */

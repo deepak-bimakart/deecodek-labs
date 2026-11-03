@@ -8,7 +8,8 @@ import { SmoothScroll } from "@/components/motion/smooth-scroll";
 import { AnalyticsScripts } from "@/components/analytics-scripts";
 import { SeoJsonLd } from "@/components/seo-json-ld";
 import { db } from "@/lib/db";
-import { SITE_NAME, SITE_URL } from "@/lib/seo";
+import { SITE_URL } from "@/lib/seo";
+import { getGlobalSeoSettings } from "@/lib/seo-settings";
 
 async function getAnalyticsSettings(): Promise<{
   gaId: string | null;
@@ -54,82 +55,87 @@ const plexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600"],
 });
 
-export const metadata: Metadata = {
-  metadataBase: new URL(SITE_URL),
-  title: {
-    default: "DeeCodeK Labs — Software Studio. Product Lab.",
-    template: "%s · DeeCodeK Labs",
-  },
-  description:
-    "Custom products, scalable backends, and useful tools engineered for the real world. Software studio and product lab based in India.",
-  keywords: [
-    "DeeCodeK Labs",
-    "software studio",
-    "product lab",
-    "full-stack development",
-    "open source",
-    "Flutter apps",
-    "SaaS",
-    "NestJS",
-    "Next.js agency India",
-  ],
-  authors: [{ name: SITE_NAME, url: SITE_URL }],
-  creator: SITE_NAME,
-  publisher: SITE_NAME,
-  category: "technology",
-  verification: {
-    google: "7yf3lk44AjMw2D6lZ8-gHB_tkQUcV1xp7zTG48Jqtjk",
-  },
-  icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "48x48" },
-      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
-      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+export async function generateMetadata(): Promise<Metadata> {
+  const seo = await getGlobalSeoSettings();
+  const verification: Metadata["verification"] = {};
+  if (seo.googleVerification) verification.google = seo.googleVerification;
+  if (seo.bingVerification) {
+    verification.other = { "msvalidate.01": seo.bingVerification };
+  }
+
+  return {
+    metadataBase: new URL(SITE_URL),
+    title: {
+      default: seo.defaultTitle,
+      template: seo.titleTemplate,
+    },
+    description: seo.defaultDescription,
+    keywords: [
+      seo.siteName,
+      "software studio",
+      "product lab",
+      "full-stack development",
+      "open source",
+      "Flutter apps",
+      "SaaS",
+      "NestJS",
+      "Next.js agency India",
     ],
-    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
-  },
-  manifest: "/site.webmanifest",
-  other: {
-    "msapplication-TileColor": "#087F70",
-  },
-  alternates: {
-    canonical: "/",
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
+    authors: [{ name: seo.siteName, url: SITE_URL }],
+    creator: seo.siteName,
+    publisher: seo.siteName,
+    category: "technology",
+    verification: Object.keys(verification).length ? verification : undefined,
+    icons: {
+      icon: [
+        { url: "/favicon.ico", sizes: "48x48" },
+        { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+        { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+      ],
+      apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+    },
+    manifest: "/site.webmanifest",
+    other: {
+      "msapplication-TileColor": "#087F70",
+    },
+    alternates: {
+      canonical: "/",
+    },
+    robots: {
       index: true,
       follow: true,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-      "max-video-preview": -1,
-    },
-  },
-  openGraph: {
-    title: "DeeCodeK Labs — Software Studio. Product Lab.",
-    description:
-      "Custom products, scalable backends, and useful tools engineered for the real world.",
-    url: SITE_URL,
-    siteName: SITE_NAME,
-    locale: "en_IN",
-    type: "website",
-    images: [
-      {
-        url: "/logo-light.png",
-        width: 512,
-        height: 512,
-        alt: "DeeCodeK Labs",
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
       },
-    ],
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "DeeCodeK Labs",
-    description: "Software Studio. Product Lab.",
-    images: ["/logo-light.png"],
-  },
-};
+    },
+    openGraph: {
+      title: seo.defaultTitle,
+      description: seo.defaultDescription,
+      url: SITE_URL,
+      siteName: seo.siteName,
+      locale: "en_IN",
+      type: "website",
+      images: [
+        {
+          url: seo.defaultOgImage,
+          width: 512,
+          height: 512,
+          alt: seo.siteName,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: seo.siteName,
+      description: "Software Studio. Product Lab.",
+      images: [seo.defaultOgImage],
+    },
+  };
+}
 
 export default async function RootLayout({
   children,
@@ -150,9 +156,7 @@ export default async function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <SmoothScroll>
-            {children}
-          </SmoothScroll>
+          <SmoothScroll>{children}</SmoothScroll>
           <Toaster />
           <SonnerToaster position="bottom-right" richColors />
           <AnalyticsScripts
