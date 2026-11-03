@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion, useReducedMotion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 import { Counter, parseMetricValue } from "@/components/motion/motion";
@@ -22,14 +23,16 @@ export function EditorialTextSection({ content }: { content: EditorialTextConten
       <div className="mx-auto grid max-w-7xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:gap-16 lg:px-10 lg:py-28">
         <div ref={imageRef} className="relative overflow-hidden rounded-xl border border-border">
           <motion.div
-            className="aspect-[4/5] lg:aspect-[3/4]"
+            className="relative aspect-[4/5] lg:aspect-[3/4]"
             style={{ y: reduce ? 0 : imageY, scale: reduce ? 1 : imageScale }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/images/hero/architecture.png"
+            <Image
+              src="/images/optimized/hero/architecture.jpg"
               alt="System architecture visualization — DeeCodeK Labs engineering map"
-              className="h-full w-full object-cover"
+              fill
+              sizes="(max-width: 1024px) 100vw, 50vw"
+              className="object-cover"
+              quality={78}
             />
           </motion.div>
           <div className="absolute left-3 top-3 rounded-md bg-background/80 px-2 py-1 backdrop-blur-md">

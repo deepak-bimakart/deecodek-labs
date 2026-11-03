@@ -2,34 +2,17 @@
 
 import { motion, useReducedMotion } from "framer-motion";
 
-/** Editorial terminal panel — teal brand, no fake SaaS metrics. */
+/** Editorial terminal panel — teal brand, no fake SaaS metrics.
+ *  Light entrance only — avoid long stagger that delays perceived readiness. */
 export function HeroVisual() {
   const reduce = useReducedMotion();
-
-  const container = {
-    hidden: {},
-    show: {
-      transition: {
-        staggerChildren: reduce ? 0 : 0.1,
-        delayChildren: 0.4,
-      },
-    },
-  };
-  const item = {
-    hidden: reduce ? {} : { opacity: 0, y: 16 },
-    show: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
-    },
-  };
 
   return (
     <motion.div
       className="relative h-full w-full"
-      variants={container}
-      initial="hidden"
-      animate="show"
+      initial={reduce ? false : { opacity: 0.9, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
     >
       <div
         className="absolute -right-16 -top-16 h-72 w-72 rounded-full bg-primary/10 blur-3xl"
@@ -40,10 +23,7 @@ export function HeroVisual() {
         aria-hidden
       />
 
-      <motion.div
-        variants={item}
-        className="relative z-20 overflow-hidden rounded-xl border border-border bg-card shadow-xl shadow-primary/5"
-      >
+      <div className="relative z-20 overflow-hidden rounded-xl border border-border bg-card shadow-xl shadow-primary/5">
         <div className="flex items-center gap-1.5 border-b border-border bg-muted/40 px-3 py-2.5">
           <span className="h-2.5 w-2.5 rounded-full bg-red-400/50" />
           <span className="h-2.5 w-2.5 rounded-full bg-amber-400/50" />
@@ -79,17 +59,14 @@ export function HeroVisual() {
             <span className="inline-block h-3.5 w-[7px] animate-pulse bg-primary" />
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        variants={item}
-        className="absolute -bottom-3 -left-3 z-30 hidden rounded-lg border border-border bg-card px-3 py-2 shadow-md sm:block"
-      >
+      <div className="absolute -bottom-3 -left-3 z-30 hidden rounded-lg border border-border bg-card px-3 py-2 shadow-md sm:block">
         <p className="font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
           Shipping
         </p>
         <p className="text-xs font-medium text-foreground">Studio + Product Lab</p>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }
