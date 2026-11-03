@@ -16,6 +16,8 @@ import { buildBlogPostingJsonLd } from "@/lib/json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 import { resolveContentAccess } from "@/lib/preview";
 import { relatedServicesForPost } from "@/lib/related-content";
+import { extractMarkdownToc, headingIdFromChildren } from "@/lib/markdown-toc";
+import { BlogToc } from "@/components/public/blog-toc";
 import { ArrowUpRight } from "lucide-react";
 
 export const revalidate = 60;
@@ -104,6 +106,8 @@ export default async function BlogDetailPage({
     schemaType: post.seo?.schemaType,
   });
 
+  const toc = extractMarkdownToc(post.content);
+
   return (
     <PublicShell>
       {access.isPreview ? <PreviewBadge /> : null}
@@ -135,7 +139,17 @@ export default async function BlogDetailPage({
         <StoryChapter id="chapter-meta" index="02" label="META" className="border-b border-border bg-background">
           <div className="mx-auto max-w-3xl px-6 py-6 lg:px-10">
             <div className="flex flex-wrap items-center gap-4 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
-              {post.author?.name && <span>By {post.author.name}</span>}
+              {post.author?.name && post.author.id && (
+                <span>
+                  By{" "}
+                  <Link
+                    href={`/blog/author/${post.author.id}`}
+                    className="underline-offset-4 hover:text-foreground hover:underline"
+                  >
+                    {post.author.name}
+                  </Link>
+                </span>
+              )}
               <span aria-hidden>·</span>
               <span>{post.readingMinutes} min read</span>
               {post.publishedAt && (
@@ -169,11 +183,33 @@ export default async function BlogDetailPage({
           <StoryChapter id="chapter-body" index="04" label="BODY" className="border-b border-border bg-background">
             <Reveal>
               <div className="prose prose-lg mx-auto max-w-3xl px-6 pb-16 pt-4 lg:px-10 lg:pb-20">
+                <BlogToc headings={toc} />
                 <ReactMarkdown
                   components={{
-                    h1: ({ children }) => <h2 className="font-display text-3xl font-semibold mt-10 mb-4">{children}</h2>,
-                    h2: ({ children }) => <h2 className="font-display text-2xl font-semibold mt-8 mb-3">{children}</h2>,
-                    h3: ({ children }) => <h3 className="font-display text-xl font-semibold mt-6 mb-2">{children}</h3>,
+                    h1: ({ children }) => {
+                      const id = headingIdFromChildren(children);
+                      return (
+                        <h2 id={id} className="font-display text-3xl font-semibold mt-10 mb-4 scroll-mt-24">
+                          {children}
+                        </h2>
+                      );
+                    },
+                    h2: ({ children }) => {
+                      const id = headingIdFromChildren(children);
+                      return (
+                        <h2 id={id} className="font-display text-2xl font-semibold mt-8 mb-3 scroll-mt-24">
+                          {children}
+                        </h2>
+                      );
+                    },
+                    h3: ({ children }) => {
+                      const id = headingIdFromChildren(children);
+                      return (
+                        <h3 id={id} className="font-display text-xl font-semibold mt-6 mb-2 scroll-mt-24">
+                          {children}
+                        </h3>
+                      );
+                    },
                     p: ({ children }) => <p className="text-pretty text-lg leading-relaxed text-muted-foreground mb-4">{children}</p>,
                     ul: ({ children }) => <ul className="list-disc pl-6 space-y-2 mb-4 text-muted-foreground">{children}</ul>,
                     ol: ({ children }) => <ol className="list-decimal pl-6 space-y-2 mb-4 text-muted-foreground">{children}</ol>,

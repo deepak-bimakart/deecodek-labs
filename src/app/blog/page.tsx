@@ -14,7 +14,16 @@ import { cn } from "@/lib/utils";
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
-  return buildListPageMetadata("blog");
+  const meta = await buildListPageMetadata("blog");
+  return {
+    ...meta,
+    alternates: {
+      ...meta.alternates,
+      types: {
+        "application/rss+xml": "/feed.xml",
+      },
+    },
+  };
 }
 
 export default async function BlogPage({
@@ -52,7 +61,14 @@ export default async function BlogPage({
         subtitle={hero.subtitle}
         chapterIndex="01"
         chapterLabel="FIELD NOTES"
-      />
+      >
+        <Link
+          href="/feed.xml"
+          className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground hover:text-primary"
+        >
+          RSS feed →
+        </Link>
+      </PageHero>
 
       <StoryChapter id="chapter-feed" index="02" label="FEED" className="border-b border-border">
         <div className="bg-secondary/30">
