@@ -36,8 +36,14 @@ export default async function AdminSeoPage() {
           <Link href="/admin/seo/404s" className="text-primary hover:underline">
             404 monitor
           </Link>
+          <Link href="/admin/seo/search-console" className="text-primary hover:underline">
+            Search Console
+          </Link>
           <Link href="/admin/settings#seo" className="text-primary hover:underline">
             Global SEO settings
+          </Link>
+          <Link href="/admin/settings#analytics" className="text-primary hover:underline">
+            Analytics
           </Link>
         </div>
       </div>

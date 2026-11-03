@@ -81,6 +81,7 @@ const NAV_GROUPS: Array<{
       { label: "SEO Settings", href: "/admin/seo", icon: Search },
       { label: "Bulk SEO", href: "/admin/seo/bulk", icon: Table2 },
       { label: "404 Monitor", href: "/admin/seo/404s", icon: Unlink },
+      { label: "Search Console", href: "/admin/seo/search-console", icon: BarChart3 },
       { label: "Redirects", href: "/admin/redirects", icon: ArrowRightLeft },
       { label: "Audit Log", href: "/admin/audit", icon: ScrollText },
       { label: "Theme Settings", href: "/admin/settings#theme", icon: Palette },

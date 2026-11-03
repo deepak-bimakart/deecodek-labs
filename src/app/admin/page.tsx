@@ -10,11 +10,13 @@ import {
   Eye,
   ArrowUpRight,
   Activity,
+  Search,
 } from "lucide-react";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/rbac";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { getSeoHealthSummary } from "@/lib/seo-health";
 
 export const dynamic = "force-dynamic";
 
@@ -35,6 +37,7 @@ export default async function AdminDashboardPage() {
     mediaTotal,
     recentContact,
     recentLogs,
+    seoHealth,
   ] = await Promise.all([
     db.page.count(),
     db.page.count({ where: { status: "PUBLISHED" } }),
@@ -56,6 +59,7 @@ export default async function AdminDashboardPage() {
       take: 8,
       include: { user: { select: { name: true, email: true } } },
     }),
+    getSeoHealthSummary(),
   ]);
 
   const stats = [
@@ -115,6 +119,56 @@ export default async function AdminDashboardPage() {
           );
         })}
       </div>
+
+      <Card className="p-5">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="flex items-center gap-2 font-display text-base font-semibold">
+            <Search className="h-4 w-4" /> SEO health
+            <Badge variant="secondary" className="font-mono text-[10px]">
+              Weekly snapshot
+            </Badge>
+          </h2>
+          <div className="flex flex-wrap gap-3 text-xs">
+            <Link href="/admin/seo" className="text-primary hover:underline">
+              SEO panel →
+            </Link>
+            <Link href="/admin/seo/search-console" className="text-primary hover:underline">
+              Search Console →
+            </Link>
+            <Link href="/admin/seo/404s" className="text-primary hover:underline">
+              404s →
+            </Link>
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <Link
+            href="/admin/seo/bulk"
+            className="rounded-md border border-border p-4 transition-colors hover:border-primary/40"
+          >
+            <p className="font-display text-3xl font-semibold">{seoHealth.missingMetaCount}</p>
+            <p className="mt-1 text-xs text-muted-foreground">Pages missing meta title or description</p>
+          </Link>
+          <Link
+            href="/admin/seo/404s"
+            className="rounded-md border border-border p-4 transition-colors hover:border-primary/40"
+          >
+            <p className="font-display text-3xl font-semibold">{seoHealth.notFoundHitCount}</p>
+            <p className="mt-1 text-xs text-muted-foreground">404 hit count (all paths)</p>
+          </Link>
+          <Link
+            href="/admin/seo/bulk"
+            className="rounded-md border border-border p-4 transition-colors hover:border-primary/40"
+          >
+            <p className="font-display text-3xl font-semibold">
+              {seoHealth.avgSeoScore != null ? seoHealth.avgSeoScore : "—"}
+            </p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Avg SEO score
+              {seoHealth.scoredRecords > 0 ? ` · ${seoHealth.scoredRecords} scored` : ""}
+            </p>
+          </Link>
+        </div>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Recent inquiries */}
@@ -220,6 +274,12 @@ export default async function AdminDashboardPage() {
             className="rounded-md border border-border bg-background px-3 py-1.5 text-sm hover:bg-muted"
           >
             Review contact ({contactUnread} new)
+          </Link>
+          <Link
+            href="/admin/seo/search-console"
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm hover:bg-muted"
+          >
+            Search Console
           </Link>
         </div>
       </Card>
