@@ -6,18 +6,13 @@ import { ProductCard } from "@/components/public/product-card";
 import { StaggerGrid, StaggerItem } from "@/components/motion/stagger-grid";
 import { StoryChapter } from "@/components/story/story-chapter";
 import { StoryCloseCta } from "@/components/story/story-close-cta";
-import { buildPageMetadata } from "@/lib/seo";
 import { getListHero } from "@/lib/list-heroes";
+import { buildListPageMetadata } from "@/lib/list-page-seo";
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const hero = await getListHero("products");
-  return buildPageMetadata(null, {
-    title: hero.title,
-    description: hero.subtitle,
-    path: "/products",
-  });
+  return buildListPageMetadata("products");
 }
 
 export default async function ProductsPage() {

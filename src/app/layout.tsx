@@ -80,7 +80,18 @@ export const metadata: Metadata = {
   verification: {
     google: "7yf3lk44AjMw2D6lZ8-gHB_tkQUcV1xp7zTG48Jqtjk",
   },
-  icons: { icon: "/logo-light.png", apple: "/logo-light.png" },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "48x48" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  manifest: "/site.webmanifest",
+  other: {
+    "msapplication-TileColor": "#087F70",
+  },
   alternates: {
     canonical: "/",
   },

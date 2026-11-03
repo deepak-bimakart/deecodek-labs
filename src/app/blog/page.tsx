@@ -7,19 +7,14 @@ import { BlogCard } from "@/components/public/blog-card";
 import { StaggerGrid, StaggerItem } from "@/components/motion/stagger-grid";
 import { StoryChapter } from "@/components/story/story-chapter";
 import { StoryCloseCta } from "@/components/story/story-close-cta";
-import { buildPageMetadata } from "@/lib/seo";
 import { getListHero } from "@/lib/list-heroes";
+import { buildListPageMetadata } from "@/lib/list-page-seo";
 import { cn } from "@/lib/utils";
 
 export const revalidate = 60;
 
 export async function generateMetadata(): Promise<Metadata> {
-  const hero = await getListHero("blog");
-  return buildPageMetadata(null, {
-    title: hero.title,
-    description: hero.subtitle,
-    path: "/blog",
-  });
+  return buildListPageMetadata("blog");
 }
 
 export default async function BlogPage({

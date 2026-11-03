@@ -197,15 +197,6 @@ export function ClientFooter({
                       />
                     </a>
                   </li>
-                  <li>
-                    <Link
-                      href="/admin"
-                      className="group inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
-                    >
-                      Admin CMS
-                      <ArrowUpRight className="h-3 w-3 transition-transform duration-200 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                    </Link>
-                  </li>
                 </ul>
               </div>
               <div>

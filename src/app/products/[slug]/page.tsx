@@ -9,6 +9,7 @@ import { PreviewBadge } from "@/components/public/preview-badge";
 import { Reveal } from "@/components/motion/motion";
 import { StoryChapter } from "@/components/story/story-chapter";
 import { StoryCloseCta } from "@/components/story/story-close-cta";
+import { Breadcrumbs } from "@/components/public/breadcrumbs";
 import { buildPageMetadata } from "@/lib/seo";
 import { resolveContentAccess } from "@/lib/preview";
 
@@ -93,6 +94,13 @@ export default async function ProductDetailPage({
           chapterIndex="01"
           chapterLabel="PRODUCT"
         >
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Products", href: "/products" },
+              { label: product.name },
+            ]}
+          />
           <Link
             href="/products"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"

@@ -10,90 +10,98 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [pages, services, products, projects, posts] = await Promise.all([
     db.page.findMany({
       where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true, isHomepage: true },
+      select: {
+        slug: true,
+        updatedAt: true,
+        isHomepage: true,
+        seo: { select: { robotsIndex: true } },
+      },
     }),
     db.service.findMany({
       where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true },
+      select: {
+        slug: true,
+        updatedAt: true,
+        seo: { select: { robotsIndex: true } },
+      },
     }),
     db.product.findMany({
       where: { status: { not: "archived" } },
-      select: { slug: true, updatedAt: true },
+      select: {
+        slug: true,
+        updatedAt: true,
+        seo: { select: { robotsIndex: true } },
+      },
     }),
     db.project.findMany({
       where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true },
+      select: {
+        slug: true,
+        updatedAt: true,
+        seo: { select: { robotsIndex: true } },
+      },
     }),
     db.blogPost.findMany({
       where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true, publishedAt: true },
+      select: {
+        slug: true,
+        updatedAt: true,
+        publishedAt: true,
+        seo: { select: { robotsIndex: true } },
+      },
     }),
   ]);
 
+  const indexable = <T extends { seo: { robotsIndex: boolean } | null }>(row: T) =>
+    row.seo?.robotsIndex !== false;
+
+  const home = pages.find((p) => p.isHomepage || p.slug === "home");
+  const about = pages.find((p) => p.slug === "about");
+  const contact = pages.find((p) => p.slug === "contact");
+
   const staticRoutes: MetadataRoute.Sitemap = [
-    "/",
-    "/services",
-    "/products",
-    "/work",
-    "/about",
-    "/blog",
-    "/contact",
-    "/opensource",
-  ].map((path) => ({
-    url: `${base}${path === "/" ? "" : path}`,
-    changeFrequency: "weekly" as const,
-    priority: path === "/" ? 1 : 0.8,
-  }));
+    { url: base, lastModified: home?.updatedAt },
+    { url: `${base}/services` },
+    { url: `${base}/products` },
+    { url: `${base}/work` },
+    {
+      url: `${base}/about`,
+      lastModified: about?.updatedAt,
+    },
+    { url: `${base}/blog` },
+    {
+      url: `${base}/contact`,
+      lastModified: contact?.updatedAt,
+    },
+    { url: `${base}/opensource` },
+  ];
 
   const pageEntries: MetadataRoute.Sitemap = pages
+    .filter(indexable)
     .filter((p) => !p.isHomepage && !["home", "about", "contact"].includes(p.slug))
     .map((p) => ({
       url: `${base}/${p.slug}`,
       lastModified: p.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
     }));
-
-  // Ensure homepage lastmod from CMS when available
-  const home = pages.find((p) => p.isHomepage || p.slug === "home");
-  if (home) {
-    const idx = staticRoutes.findIndex((r) => r.url === base || r.url === `${base}/`);
-    if (idx >= 0) {
-      staticRoutes[idx] = {
-        ...staticRoutes[idx],
-        url: base,
-        lastModified: home.updatedAt,
-        priority: 1,
-      };
-    }
-  }
 
   return [
     ...staticRoutes,
     ...pageEntries,
-    ...services.map((s) => ({
+    ...services.filter(indexable).map((s) => ({
       url: `${base}/services/${s.slug}`,
       lastModified: s.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
     })),
-    ...products.map((p) => ({
+    ...products.filter(indexable).map((p) => ({
       url: `${base}/products/${p.slug}`,
       lastModified: p.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.7,
     })),
-    ...projects.map((p) => ({
+    ...projects.filter(indexable).map((p) => ({
       url: `${base}/work/${p.slug}`,
       lastModified: p.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
     })),
-    ...posts.map((p) => ({
+    ...posts.filter(indexable).map((p) => ({
       url: `${base}/blog/${p.slug}`,
       lastModified: p.publishedAt ?? p.updatedAt,
-      changeFrequency: "weekly" as const,
-      priority: 0.6,
     })),
   ];
 }

@@ -47,6 +47,15 @@ function matchRedirect(pathname: string, rules: RedirectRule[]): RedirectRule | 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const host = req.headers.get("host") ?? "";
+  const bareHost = host.split(":")[0].toLowerCase();
+
+  // Canonical host: www → apex (301). Skip localhost / preview hosts.
+  if (bareHost === "www.deecodeklabs.com") {
+    const url = req.nextUrl.clone();
+    url.hostname = "deecodeklabs.com";
+    url.protocol = "https:";
+    return NextResponse.redirect(url, 301);
+  }
 
   // Apply CMS redirects for public paths (skip admin/api/static)
   if (
@@ -91,6 +100,12 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
+  const noIndexHeaders = () => {
+    const res = NextResponse.next();
+    res.headers.set("X-Robots-Tag", "noindex, nofollow");
+    return res;
+  };
+
   if (pathname === "/admin/login") {
     const token = await getToken({
       req,
@@ -99,7 +114,7 @@ export async function middleware(req: NextRequest) {
     if (token) {
       return NextResponse.redirect(new URL("/admin", req.url));
     }
-    return NextResponse.next();
+    return noIndexHeaders();
   }
 
   const token = await getToken({
@@ -112,7 +127,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  return NextResponse.next();
+  return noIndexHeaders();
 }
 
 export const config = {

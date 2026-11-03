@@ -1,16 +1,26 @@
+import type { Metadata } from "next";
 import { getCurrentUser } from "@/lib/rbac";
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminTopbar } from "@/components/admin/topbar";
 
 export const dynamic = "force-dynamic";
 
+export const metadata: Metadata = {
+  robots: {
+    index: false,
+    follow: false,
+    googleBot: { index: false, follow: false },
+  },
+  title: {
+    default: "Admin",
+    template: "%s · Admin · DeeCodeK Labs",
+  },
+};
+
 // Auth + redirect is handled by middleware (see src/middleware.ts).
-// This layout just renders the chrome (topbar + sidebar) for authenticated admin pages.
-// Login page is /admin/login and uses its own minimal layout (no chrome).
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const user = await getCurrentUser();
 
-  // If we somehow get here without a user (edge case), render minimal
   if (!user) {
     return <div className="min-h-screen bg-background">{children}</div>;
   }

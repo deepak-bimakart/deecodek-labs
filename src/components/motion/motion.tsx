@@ -199,10 +199,20 @@ export function Counter({
   const reduce = useReducedMotion();
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { once: true, margin: "-40px" });
-  const [display, setDisplay] = useState(0);
+  // SSR + first paint show the real value (crawlers must not see 0)
+  const [display, setDisplay] = useState(value);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    if (!inView || reduce) return;
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !inView || reduce) {
+      setDisplay(value);
+      return;
+    }
+    setDisplay(0);
     let raf: number;
     let start: number | null = null;
     const animate = (t: number) => {
@@ -216,18 +226,7 @@ export function Counter({
     };
     raf = requestAnimationFrame(animate);
     return () => cancelAnimationFrame(raf);
-  }, [inView, value, duration, reduce]);
-
-  // For reduced motion, render the final value directly (no state animation)
-  if (reduce) {
-    return (
-      <span ref={ref} className={className}>
-        {prefix}
-        {value}
-        {suffix}
-      </span>
-    );
-  }
+  }, [mounted, inView, value, duration, reduce]);
 
   return (
     <span ref={ref} className={className}>

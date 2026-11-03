@@ -9,6 +9,7 @@ import { PreviewBadge } from "@/components/public/preview-badge";
 import { Reveal } from "@/components/motion/motion";
 import { StoryChapter } from "@/components/story/story-chapter";
 import { StoryCloseCta } from "@/components/story/story-close-cta";
+import { Breadcrumbs } from "@/components/public/breadcrumbs";
 import ReactMarkdown from "react-markdown";
 import { buildPageMetadata } from "@/lib/seo";
 import { resolveContentAccess } from "@/lib/preview";
