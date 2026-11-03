@@ -1,4 +1,4 @@
-﻿// DeeCodeK Labs — Custom Headless CMS schema
+// DeeCodeK Labs — Custom Headless CMS schema
 // SQLite for dev (same model works on PostgreSQL for prod — change provider + url in datasource)
 
 generator client {
