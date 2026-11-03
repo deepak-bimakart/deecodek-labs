@@ -1,12 +1,9 @@
 import dynamic from "next/dynamic";
 import { db } from "@/lib/db";
 import type { PageSection, Product, ProductFeature, Service, Project, BlogPost, BlogCategory, User } from "@prisma/client";
-<<<<<<< HEAD
 import { JsonLd } from "@/components/seo-json-ld";
 import { buildFaqPageJsonLd } from "@/lib/json-ld";
-=======
 // Hero stays eagerly loaded - above-fold LCP path
->>>>>>> origin/seo/phase-3-cwv
 import {
   HeroSection as HeroClient,
 } from "@/components/sections/hero-section";

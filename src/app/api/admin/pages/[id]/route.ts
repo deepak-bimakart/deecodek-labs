@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getCurrentUser, audit, can } from "@/lib/rbac";
 import { nestedSeoSchema } from "@/lib/seo";
 import { upsertSeoRecord } from "@/lib/attach-seo";
+import { createSlugChangeRedirect } from "@/lib/slug-redirect";
 
 // GET /api/admin/pages/[id] — single page with sections
 export async function GET(
@@ -57,13 +59,38 @@ export async function PATCH(
   const data: any = { ...rest, updatedById: user.id };
   if (rest.status === "PUBLISHED") data.publishedAt = new Date();
 
+  const existing = await db.page.findUnique({
+    where: { id },
+    select: { slug: true, status: true, seoId: true, title: true, isHomepage: true },
+  });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   if (seo !== undefined) {
-    const existing = await db.page.findUnique({ where: { id }, select: { seoId: true } });
-    const seoId = await upsertSeoRecord(existing?.seoId, seo);
+    const seoId = await upsertSeoRecord(existing.seoId, seo, {
+      fallbackTitle: rest.title ?? existing.title,
+    });
     if (seoId !== undefined) data.seoId = seoId;
   }
 
   const page = await db.page.update({ where: { id }, data, include: { seo: true } });
+
+  if (rest.slug && rest.slug !== existing.slug) {
+    const willBePublic =
+      (rest.status ?? existing.status) === "PUBLISHED" || page.status === "PUBLISHED";
+    await createSlugChangeRedirect({
+      kind: "page",
+      oldSlug: existing.slug,
+      newSlug: rest.slug,
+      isPublic: willBePublic,
+    });
+  }
+
+  revalidatePath("/");
+  revalidatePath(`/${page.slug}`);
+  if (rest.slug && rest.slug !== existing.slug) {
+    revalidatePath(`/${existing.slug}`);
+  }
+
   await audit({ action: "update", entityType: "page", entityId: id, userId: user.id, metadata: rest });
   return NextResponse.json({ page });
 }

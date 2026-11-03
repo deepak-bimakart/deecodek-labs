@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getCurrentUser, audit, can } from "@/lib/rbac";
 import { nestedSeoSchema } from "@/lib/seo";
 import { upsertSeoRecord } from "@/lib/attach-seo";
+import { createSlugChangeRedirect } from "@/lib/slug-redirect";
 
 const productUpdateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
@@ -49,9 +51,16 @@ export async function PATCH(
   if (productData.gallery !== undefined) data.gallery = JSON.stringify(productData.gallery);
   if (productData.technologies !== undefined) data.technologies = JSON.stringify(productData.technologies);
 
+  const existing = await db.product.findUnique({
+    where: { id },
+    select: { slug: true, status: true, seoId: true, name: true },
+  });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   if (seo !== undefined) {
-    const existing = await db.product.findUnique({ where: { id }, select: { seoId: true } });
-    const seoId = await upsertSeoRecord(existing?.seoId, seo);
+    const seoId = await upsertSeoRecord(existing.seoId, seo, {
+      fallbackTitle: productData.name ?? existing.name,
+    });
     if (seoId !== undefined) data.seoId = seoId;
   }
 
@@ -74,6 +83,23 @@ export async function PATCH(
     data,
     include: { features: { orderBy: { sortOrder: "asc" } }, seo: true },
   });
+
+  if (productData.slug && productData.slug !== existing.slug) {
+    const nextStatus = productData.status ?? existing.status;
+    const isPublic = nextStatus !== "archived";
+    await createSlugChangeRedirect({
+      kind: "product",
+      oldSlug: existing.slug,
+      newSlug: productData.slug,
+      isPublic,
+    });
+  }
+
+  revalidatePath("/products");
+  revalidatePath(`/products/${product.slug}`);
+  if (productData.slug && productData.slug !== existing.slug) {
+    revalidatePath(`/products/${existing.slug}`);
+  }
 
   await audit({ action: "update", entityType: "product", entityId: id, userId: user.id });
   return NextResponse.json({ product });

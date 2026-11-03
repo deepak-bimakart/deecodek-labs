@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+﻿import type { Metadata } from "next";
 import type { SeoMetadata } from "@prisma/client";
 import { z } from "zod";
 
@@ -10,28 +10,6 @@ const zNullableString = z
   .optional()
   .transform((v) => (v == null || v === "" ? null : v));
 
-const zStructuredData = z
-  .union([z.string(), z.null()])
-  .optional()
-  .transform((v) => (v == null || v === "" ? null : v))
-  .superRefine((v, ctx) => {
-    if (v == null) return;
-    try {
-      const parsed = JSON.parse(v);
-      if (parsed === null || typeof parsed !== "object") {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "structuredData must be a JSON object or array",
-        });
-      }
-    } catch {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        message: "structuredData must be valid JSON",
-      });
-    }
-  });
-
 export const seoFieldsSchema = z.object({
   metaTitle: zNullableString,
   metaDescription: zNullableString,
@@ -41,8 +19,13 @@ export const seoFieldsSchema = z.object({
   ogImage: zNullableString,
   robotsIndex: z.boolean().optional(),
   robotsFollow: z.boolean().optional(),
+  structuredData: zNullableString,
+  focusKeyword: zNullableString,
+  secondaryKeywords: zNullableString,
   schemaType: zNullableString,
-  structuredData: zStructuredData,
+  breadcrumbLabel: zNullableString,
+  includeInSitemap: z.boolean().optional(),
+  seoScore: z.number().int().min(0).max(100).optional().nullable(),
 });
 
 /** Nested SEO payload on entity create/update. */

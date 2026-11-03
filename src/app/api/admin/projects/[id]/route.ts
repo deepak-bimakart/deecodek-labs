@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getCurrentUser, audit, can } from "@/lib/rbac";
 import { nestedSeoSchema } from "@/lib/seo";
 import { upsertSeoRecord } from "@/lib/attach-seo";
+import { createSlugChangeRedirect } from "@/lib/slug-redirect";
 
 const projectUpdateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
@@ -43,13 +45,38 @@ export async function PATCH(
   if (rest.technologies !== undefined) data.technologies = JSON.stringify(rest.technologies);
   if (completionDate !== undefined) data.completionDate = completionDate ? new Date(completionDate) : null;
 
+  const existing = await db.project.findUnique({
+    where: { id },
+    select: { slug: true, status: true, seoId: true, name: true },
+  });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   if (seo !== undefined) {
-    const existing = await db.project.findUnique({ where: { id }, select: { seoId: true } });
-    const seoId = await upsertSeoRecord(existing?.seoId, seo);
+    const seoId = await upsertSeoRecord(existing.seoId, seo, {
+      fallbackTitle: rest.name ?? existing.name,
+    });
     if (seoId !== undefined) data.seoId = seoId;
   }
 
   const project = await db.project.update({ where: { id }, data, include: { seo: true } });
+
+  if (rest.slug && rest.slug !== existing.slug) {
+    const willBePublic =
+      (rest.status ?? existing.status) === "PUBLISHED" || project.status === "PUBLISHED";
+    await createSlugChangeRedirect({
+      kind: "project",
+      oldSlug: existing.slug,
+      newSlug: rest.slug,
+      isPublic: willBePublic,
+    });
+  }
+
+  revalidatePath("/work");
+  revalidatePath(`/work/${project.slug}`);
+  if (rest.slug && rest.slug !== existing.slug) {
+    revalidatePath(`/work/${existing.slug}`);
+  }
+
   await audit({ action: "update", entityType: "project", entityId: id, userId: user.id });
   return NextResponse.json({ project });
 }

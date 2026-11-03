@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { db } from "@/lib/db";
 import { getCurrentUser, audit, can } from "@/lib/rbac";
 import { nestedSeoSchema } from "@/lib/seo";
 import { upsertSeoRecord } from "@/lib/attach-seo";
+import { createSlugChangeRedirect } from "@/lib/slug-redirect";
 
 const serviceUpdateSchema = z.object({
   title: z.string().min(1).max(200).optional(),
@@ -42,13 +44,38 @@ export async function PATCH(
   if (rest.capabilities !== undefined) data.capabilities = JSON.stringify(rest.capabilities);
   if (rest.status === "PUBLISHED") data.publishedAt = new Date();
 
+  const existing = await db.service.findUnique({
+    where: { id },
+    select: { slug: true, status: true, seoId: true, title: true },
+  });
+  if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
   if (seo !== undefined) {
-    const existing = await db.service.findUnique({ where: { id }, select: { seoId: true } });
-    const seoId = await upsertSeoRecord(existing?.seoId, seo);
+    const seoId = await upsertSeoRecord(existing.seoId, seo, {
+      fallbackTitle: rest.title ?? existing.title,
+    });
     if (seoId !== undefined) data.seoId = seoId;
   }
 
   const service = await db.service.update({ where: { id }, data, include: { seo: true } });
+
+  if (rest.slug && rest.slug !== existing.slug) {
+    const willBePublic =
+      (rest.status ?? existing.status) === "PUBLISHED" || service.status === "PUBLISHED";
+    await createSlugChangeRedirect({
+      kind: "service",
+      oldSlug: existing.slug,
+      newSlug: rest.slug,
+      isPublic: willBePublic,
+    });
+  }
+
+  revalidatePath("/services");
+  revalidatePath(`/services/${service.slug}`);
+  if (rest.slug && rest.slug !== existing.slug) {
+    revalidatePath(`/services/${existing.slug}`);
+  }
+
   await audit({ action: "update", entityType: "service", entityId: id, userId: user.id });
   return NextResponse.json({ service });
 }

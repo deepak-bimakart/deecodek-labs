@@ -65,6 +65,9 @@ export const PERMISSIONS: Record<string, Role[]> = {
   "contact.delete": ["SUPER_ADMIN"],
   "settings.view": ["SUPER_ADMIN", "ADMIN", "VIEWER"],
   "settings.update": ["SUPER_ADMIN", "ADMIN"],
+  /** CMS SEO panel, bulk editor, 404 monitor. EDITOR+ */
+  "seo.manage": ["SUPER_ADMIN", "ADMIN", "EDITOR"],
+  "seo.view": ["SUPER_ADMIN", "ADMIN", "EDITOR", "VIEWER"],
   "users.view": ["SUPER_ADMIN", "ADMIN"],
   "users.create": ["SUPER_ADMIN"],
   "users.update": ["SUPER_ADMIN"],
