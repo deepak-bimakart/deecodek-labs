@@ -157,7 +157,7 @@ export function ProjectForm({
           <StringListEditor items={gallery} onChange={setGallery} placeholder="/uploads/..." />
         </div>
 
-        <EntitySeoFields value={seo} onChange={setSeo} />
+        <EntitySeoFields value={seo} onChange={setSeo} entityType="project" />
       </Card>
 
       <div className="space-y-4">

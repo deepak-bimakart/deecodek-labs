@@ -503,7 +503,7 @@ export function PageBuilder({ initialPage }: { initialPage: PageData }) {
             )}
           </Card>
           <div className="space-y-2">
-            <EntitySeoFields value={seo} onChange={setSeo} />
+            <EntitySeoFields value={seo} onChange={setSeo} entityType="page" />
             <Button onClick={savePageSeo} disabled={savingSeo} className="w-full" size="sm">
               {savingSeo ? (
                 <>

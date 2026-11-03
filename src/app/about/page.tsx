@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import { PublicShell } from "@/components/public/shell";
 import { PageHero } from "@/components/public/page-hero";
 import { Reveal, Counter } from "@/components/motion/motion";
+import { CustomJsonLd, JsonLd } from "@/components/seo-json-ld";
+import { buildFaqPageJsonLd } from "@/lib/json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 
 export const revalidate = 60;
@@ -25,13 +27,22 @@ export default async function AboutPage() {
     orderBy: { sortOrder: "asc" },
     take: 4,
   });
+  const page = await db.page.findUnique({
+    where: { slug: "about" },
+    include: { seo: true },
+  });
   const faqs = await db.faq.findMany({
     where: { status: "PUBLISHED" },
     orderBy: { sortOrder: "asc" },
   });
+  const faqJsonLd = buildFaqPageJsonLd(
+    faqs.map((f) => ({ question: f.question, answer: f.answer }))
+  );
 
   return (
     <PublicShell>
+      {faqJsonLd ? <JsonLd data={faqJsonLd} /> : null}
+      <CustomJsonLd raw={page?.seo?.structuredData} />
       <PageHero
         eyebrow="About"
         title="We optimize for shipped, not for slides."

@@ -4,6 +4,7 @@ import { db } from "@/lib/db";
 import { PublicShell } from "@/components/public/shell";
 import { PreviewBadge } from "@/components/public/preview-badge";
 import { PageRenderer } from "@/components/sections/renderer";
+import { CustomJsonLd } from "@/components/seo-json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 import { resolveContentAccess, wantsPreview } from "@/lib/preview";
 
@@ -77,6 +78,7 @@ export default async function HomePage({
   return (
     <PublicShell>
       {access.isPreview ? <PreviewBadge /> : null}
+      <CustomJsonLd raw={page.seo?.structuredData} />
       <PageRenderer sections={page.sections} />
     </PublicShell>
   );

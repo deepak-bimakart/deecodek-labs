@@ -164,7 +164,7 @@ export function ServiceForm({
           <StringListEditor items={capabilities} onChange={setCapabilities} placeholder="e.g. Modular architecture" multiline />
         </div>
 
-        <EntitySeoFields value={seo} onChange={setSeo} />
+        <EntitySeoFields value={seo} onChange={setSeo} entityType="service" />
       </Card>
 
       <div className="space-y-4">

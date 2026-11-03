@@ -10,6 +10,7 @@ import { Reveal } from "@/components/motion/motion";
 import { StoryChapter } from "@/components/story/story-chapter";
 import { StoryCloseCta } from "@/components/story/story-close-cta";
 import { Breadcrumbs } from "@/components/public/breadcrumbs";
+import { CustomJsonLd } from "@/components/seo-json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 import { resolveContentAccess } from "@/lib/preview";
 
@@ -47,7 +48,10 @@ export default async function ProjectDetailPage({
 }) {
   const { slug } = await params;
   const sp = await searchParams;
-  const project = await db.project.findUnique({ where: { slug } });
+  const project = await db.project.findUnique({
+    where: { slug },
+    include: { seo: true },
+  });
   const access = await resolveContentAccess({
     isPublished: !!project && project.status === "PUBLISHED",
     searchParams: sp,
@@ -64,6 +68,7 @@ export default async function ProjectDetailPage({
   return (
     <PublicShell>
       {access.isPreview ? <PreviewBadge /> : null}
+      <CustomJsonLd raw={project.seo?.structuredData} />
       <article>
         <PageHero
           eyebrow={project.category ?? "Project"}

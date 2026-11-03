@@ -1,42 +1,43 @@
-import { SITE_NAME, SITE_URL } from "@/lib/seo";
+import { buildSiteJsonLdGraph } from "@/lib/json-ld";
+import {
+  parseCustomStructuredData,
+  stringifyJsonLd,
+} from "@/lib/json-ld-shared";
 
-/** Organization + WebSite JSON-LD for Google rich results / Knowledge Graph signals. */
-export function SeoJsonLd() {
-  const base = SITE_URL.replace(/\/$/, "");
-  const data = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "Organization",
-        "@id": `${base}/#organization`,
-        name: SITE_NAME,
-        url: base,
-        logo: {
-          "@type": "ImageObject",
-          url: `${base}/logo-light.png`,
-        },
-        sameAs: [
-          "https://github.com/deecodeklabs",
-          "https://opensource.deecodeklabs.com",
-        ],
-        description:
-          "Software studio and product lab — custom products, scalable backends, and useful tools.",
-      },
-      {
-        "@type": "WebSite",
-        "@id": `${base}/#website`,
-        url: base,
-        name: SITE_NAME,
-        publisher: { "@id": `${base}/#organization` },
-        inLanguage: "en",
-      },
-    ],
-  };
-
+/** Safe JSON-LD script tag for server HTML. */
+export function JsonLd({ data }: { data: unknown }) {
+  if (data == null) return null;
+  if (typeof data === "object" && !Array.isArray(data) && Object.keys(data as object).length === 0) {
+    return null;
+  }
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: stringifyJsonLd(data) }}
+    />
+  );
+}
+
+/** Renders CMS `structuredData` only when it parses to an object or array. */
+export function CustomJsonLd({ raw }: { raw: string | null | undefined }) {
+  const parsed = parseCustomStructuredData(raw);
+  if (!parsed) return null;
+  // Ensure @context if missing on a plain object (not required for arrays / @graph)
+  if (!Array.isArray(parsed) && !("@context" in parsed)) {
+    return <JsonLd data={{ "@context": "https://schema.org", ...parsed }} />;
+  }
+  return <JsonLd data={parsed} />;
+}
+
+/** Organization + ProfessionalService + WebSite JSON-LD (site-wide). */
+export async function SeoJsonLd() {
+  const graph = await buildSiteJsonLdGraph();
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@graph": graph,
+      }}
     />
   );
 }

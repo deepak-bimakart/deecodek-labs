@@ -1,5 +1,7 @@
 import { db } from "@/lib/db";
 import type { PageSection, Product, ProductFeature, Service, Project, BlogPost, BlogCategory, User } from "@prisma/client";
+import { JsonLd } from "@/components/seo-json-ld";
+import { buildFaqPageJsonLd } from "@/lib/json-ld";
 import {
   HeroSection as HeroClient,
 } from "@/components/sections/hero-section";
@@ -351,8 +353,10 @@ async function FAQSection({ section }: { section: PageSection }) {
     items = faqs.map((f) => ({ question: f.question, answer: f.answer }));
   }
   if (items.length === 0) return null;
+  const faqJsonLd = buildFaqPageJsonLd(items);
   return (
     <section className="border-b border-border bg-background">
+      {faqJsonLd ? <JsonLd data={faqJsonLd} /> : null}
       <div className="mx-auto max-w-3xl px-6 py-20 lg:px-10 lg:py-28">
         {c.eyebrow && <p className="mono-label mb-4">{c.eyebrow}</p>}
         <h2 className="display-lg mb-10 font-medium text-balance">{c.heading}</h2>

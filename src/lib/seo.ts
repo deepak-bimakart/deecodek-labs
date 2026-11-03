@@ -10,6 +10,28 @@ const zNullableString = z
   .optional()
   .transform((v) => (v == null || v === "" ? null : v));
 
+const zStructuredData = z
+  .union([z.string(), z.null()])
+  .optional()
+  .transform((v) => (v == null || v === "" ? null : v))
+  .superRefine((v, ctx) => {
+    if (v == null) return;
+    try {
+      const parsed = JSON.parse(v);
+      if (parsed === null || typeof parsed !== "object") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "structuredData must be a JSON object or array",
+        });
+      }
+    } catch {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "structuredData must be valid JSON",
+      });
+    }
+  });
+
 export const seoFieldsSchema = z.object({
   metaTitle: zNullableString,
   metaDescription: zNullableString,
@@ -19,7 +41,8 @@ export const seoFieldsSchema = z.object({
   ogImage: zNullableString,
   robotsIndex: z.boolean().optional(),
   robotsFollow: z.boolean().optional(),
-  structuredData: zNullableString,
+  schemaType: zNullableString,
+  structuredData: zStructuredData,
 });
 
 /** Nested SEO payload on entity create/update. */

@@ -21,6 +21,7 @@ export async function upsertSeoRecord(
     ogImage: seo.ogImage ?? null,
     robotsIndex: seo.robotsIndex ?? true,
     robotsFollow: seo.robotsFollow ?? true,
+    schemaType: seo.schemaType ?? null,
     structuredData: seo.structuredData ?? null,
   };
 

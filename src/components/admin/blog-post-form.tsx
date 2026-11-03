@@ -151,7 +151,7 @@ export function BlogPostForm({
           />
         </div>
 
-        <EntitySeoFields value={seo} onChange={setSeo} />
+        <EntitySeoFields value={seo} onChange={setSeo} entityType="blog" />
       </Card>
 
       <div className="space-y-4">

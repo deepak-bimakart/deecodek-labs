@@ -229,7 +229,7 @@ export function ProductForm({
           <StringListEditor items={technologies} onChange={setTechnologies} placeholder="e.g. Next.js" />
         </div>
 
-        <EntitySeoFields value={seo} onChange={setSeo} />
+        <EntitySeoFields value={seo} onChange={setSeo} entityType="product" />
       </Card>
 
       <div className="space-y-4">

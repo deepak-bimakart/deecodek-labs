@@ -357,7 +357,9 @@ model SeoMetadata {
   ogImage         String?
   robotsIndex     Boolean  @default(true)
   robotsFollow    Boolean  @default(true)
-  structuredData  String?  // JSON string
+  /// Schema.org @type hint (e.g. BlogPosting, Service). Empty ? inferred from entity.
+  schemaType      String?
+  structuredData  String?  // JSON string - custom JSON-LD object/array
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

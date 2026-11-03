@@ -10,6 +10,8 @@ import { Reveal } from "@/components/motion/motion";
 import { StoryChapter } from "@/components/story/story-chapter";
 import { StoryCloseCta } from "@/components/story/story-close-cta";
 import { Breadcrumbs } from "@/components/public/breadcrumbs";
+import { CustomJsonLd, JsonLd } from "@/components/seo-json-ld";
+import { buildServiceJsonLd } from "@/lib/json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 import { resolveContentAccess } from "@/lib/preview";
 
@@ -47,7 +49,10 @@ export default async function ServiceDetailPage({
 }) {
   const { slug } = await params;
   const sp = await searchParams;
-  const service = await db.service.findUnique({ where: { slug } });
+  const service = await db.service.findUnique({
+    where: { slug },
+    include: { seo: true },
+  });
 
   const access = await resolveContentAccess({
     isPublished: !!service && service.status === "PUBLISHED",
@@ -62,9 +67,20 @@ export default async function ServiceDetailPage({
     capabilities = JSON.parse(service.capabilities ?? "[]");
   } catch {}
 
+  const serviceJsonLd = buildServiceJsonLd({
+    title: service.title,
+    slug: service.slug,
+    summary: service.summary,
+    description: service.description,
+    imageUrl: service.imageUrl,
+    schemaType: service.seo?.schemaType,
+  });
+
   return (
     <PublicShell>
       {access.isPreview ? <PreviewBadge /> : null}
+      <JsonLd data={serviceJsonLd} />
+      <CustomJsonLd raw={service.seo?.structuredData} />
       <article>
         <PageHero
           eyebrow={service.icon ?? "Service"}

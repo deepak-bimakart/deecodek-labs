@@ -10,6 +10,8 @@ import { Reveal } from "@/components/motion/motion";
 import { StoryChapter } from "@/components/story/story-chapter";
 import { StoryCloseCta } from "@/components/story/story-close-cta";
 import { Breadcrumbs } from "@/components/public/breadcrumbs";
+import { CustomJsonLd, JsonLd } from "@/components/seo-json-ld";
+import { buildSoftwareApplicationJsonLd } from "@/lib/json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 import { resolveContentAccess } from "@/lib/preview";
 
@@ -64,7 +66,7 @@ export default async function ProductDetailPage({
   const sp = await searchParams;
   const product = await db.product.findUnique({
     where: { slug },
-    include: { features: { orderBy: { sortOrder: "asc" } } },
+    include: { features: { orderBy: { sortOrder: "asc" } }, seo: true },
   });
 
   const access = await resolveContentAccess({
@@ -83,9 +85,24 @@ export default async function ProductDetailPage({
   const status = STATUS_LABELS[product.status] ?? STATUS_LABELS.in_development;
   const heroImage = product.coverImage || FALLBACK_IMAGES[product.slug] || gallery[0];
 
+  const productJsonLd = buildSoftwareApplicationJsonLd({
+    name: product.name,
+    slug: product.slug,
+    tagline: product.tagline,
+    summary: product.summary,
+    description: product.description,
+    coverImage: heroImage,
+    category: product.category,
+    externalUrl: product.externalUrl,
+    status: product.status,
+    schemaType: product.seo?.schemaType,
+  });
+
   return (
     <PublicShell>
       {access.isPreview ? <PreviewBadge /> : null}
+      <JsonLd data={productJsonLd} />
+      <CustomJsonLd raw={product.seo?.structuredData} />
       <article>
         <PageHero
           eyebrow={product.category ?? "Product"}

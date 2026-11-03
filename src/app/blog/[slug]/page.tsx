@@ -10,7 +10,9 @@ import { Reveal } from "@/components/motion/motion";
 import { StoryChapter } from "@/components/story/story-chapter";
 import { StoryCloseCta } from "@/components/story/story-close-cta";
 import { Breadcrumbs } from "@/components/public/breadcrumbs";
+import { CustomJsonLd, JsonLd } from "@/components/seo-json-ld";
 import ReactMarkdown from "react-markdown";
+import { buildBlogPostingJsonLd } from "@/lib/json-ld";
 import { buildPageMetadata } from "@/lib/seo";
 import { resolveContentAccess } from "@/lib/preview";
 
@@ -57,6 +59,7 @@ export default async function BlogDetailPage({
       category: true,
       author: { select: { id: true, name: true } },
       tags: { include: { tag: true } },
+      seo: true,
     },
   });
 
@@ -79,9 +82,22 @@ export default async function BlogDetailPage({
       })
     : [];
 
+  const blogJsonLd = buildBlogPostingJsonLd({
+    title: post.title,
+    slug: post.slug,
+    excerpt: post.excerpt,
+    coverImage: post.coverImage,
+    publishedAt: post.publishedAt,
+    updatedAt: post.updatedAt,
+    authorName: post.author?.name,
+    schemaType: post.seo?.schemaType,
+  });
+
   return (
     <PublicShell>
       {access.isPreview ? <PreviewBadge /> : null}
+      <JsonLd data={blogJsonLd} />
+      <CustomJsonLd raw={post.seo?.structuredData} />
       <article>
         <PageHero
           eyebrow={post.category?.name ?? "Blog"}
