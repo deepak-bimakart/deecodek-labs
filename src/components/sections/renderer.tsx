@@ -1,11 +1,11 @@
 import dynamic from "next/dynamic";
 import { db } from "@/lib/db";
 import type { PageSection, Product, ProductFeature, Service, Project, BlogPost, BlogCategory, User } from "@prisma/client";
-// Hero stays eagerly loaded — above-fold LCP path
+// Hero stays eagerly loaded - above-fold LCP path
 import {
   HeroSection as HeroClient,
 } from "@/components/sections/hero-section";
-// Below-fold homepage sections — separate client chunks
+// Below-fold homepage sections - separate client chunks
 const CapabilitiesClient = dynamic(() =>
   import("@/components/sections/capabilities-section").then((m) => m.CapabilitiesSection)
 );
