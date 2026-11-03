@@ -180,6 +180,22 @@ export function ClientFooter({
                       <NavLink item={item} />
                     </li>
                   ))}
+                  {!items.some(
+                    (i) =>
+                      i.url.includes("opensource.deecodeklabs.com") ||
+                      i.url === "/opensource"
+                  ) && (
+                    <li>
+                      <NavLink
+                        item={{
+                          id: "oss-external",
+                          label: "Open Source",
+                          url: "https://opensource.deecodeklabs.com",
+                          isNewTab: true,
+                        }}
+                      />
+                    </li>
+                  )}
                 </ul>
               </div>
               <div>
@@ -219,9 +235,15 @@ export function ClientFooter({
             <p className="text-xs text-muted-foreground">
               {brandName} · Mumbai · Software Studio. Product Lab.
             </p>
-            <p className="font-mono text-[10px] tracking-wider text-muted-foreground/70">
-              TEAL / PEACOCK
-            </p>
+            <a
+              href="https://opensource.deecodeklabs.com"
+              target="_blank"
+              rel="noreferrer"
+              className="group inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.14em] text-primary transition-colors hover:text-foreground"
+            >
+              Open Source Playground
+              <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+            </a>
           </div>
         </div>
       </footer>

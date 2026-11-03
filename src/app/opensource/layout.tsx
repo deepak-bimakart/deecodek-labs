@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
 import { db } from "@/lib/db";
-import { buildPageMetadata } from "@/lib/seo";
+import { buildPageMetadata, SITE_NAME, SITE_URL } from "@/lib/seo";
+import { ORG_ID } from "@/lib/json-ld";
+import { JsonLd } from "@/components/seo-json-ld";
+
+const OSS_URL = "https://opensource.deecodeklabs.com";
 
 export async function generateMetadata(): Promise<Metadata> {
   const keys = [
@@ -30,6 +34,40 @@ export async function generateMetadata(): Promise<Metadata> {
   );
 }
 
+/** Same Organization @id as the marketing site so entities stay unified across hosts. */
+function OpenSourceOrgJsonLd() {
+  const mainBase = SITE_URL.replace(/\/$/, "");
+  return (
+    <JsonLd
+      data={{
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": ["Organization", "ProfessionalService"],
+            "@id": ORG_ID(),
+            name: SITE_NAME,
+            url: mainBase,
+            sameAs: [OSS_URL, "https://github.com/deecodeklabs"],
+          },
+          {
+            "@type": "WebSite",
+            "@id": `${OSS_URL}/#website`,
+            name: `${SITE_NAME} Open Source`,
+            url: OSS_URL,
+            publisher: { "@id": ORG_ID() },
+            isPartOf: { "@id": `${mainBase}/#website` },
+          },
+        ],
+      }}
+    />
+  );
+}
+
 export default function OpenSourceLayout({ children }: { children: React.ReactNode }) {
-  return children;
+  return (
+    <>
+      <OpenSourceOrgJsonLd />
+      {children}
+    </>
+  );
 }

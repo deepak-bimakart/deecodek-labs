@@ -81,6 +81,13 @@ export function ClientHeader({ items, brandName }: { items: NavItem[]; brandName
   }, []);
 
   const buttonItem = items.find((i) => i.isButton);
+  const OSS_URL = "https://opensource.deecodeklabs.com";
+  const hasOssInNav = items.some(
+    (i) =>
+      i.url.includes("opensource.deecodeklabs.com") ||
+      i.url === "/opensource" ||
+      i.label.toLowerCase().includes("open source")
+  );
 
   return (
     <header
@@ -103,6 +110,23 @@ export function ClientHeader({ items, brandName }: { items: NavItem[]; brandName
 
         <nav className="hidden items-center gap-0.5 md:flex">
           <NavLinks items={items} />
+          {!hasOssInNav && (
+            <a
+              href={OSS_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="group relative px-3 py-2 text-sm transition-colors hover:text-foreground"
+            >
+              <span className="inline-flex items-center gap-1 font-mono text-[11px] uppercase tracking-[0.14em] text-primary">
+                Open Source
+                <ExternalLink className="h-3 w-3 opacity-70" />
+              </span>
+              <span
+                className="absolute inset-x-3 -bottom-px h-px origin-left scale-x-0 bg-primary transition-transform duration-300 group-hover:scale-x-100"
+                aria-hidden
+              />
+            </a>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">
@@ -157,6 +181,24 @@ export function ClientHeader({ items, brandName }: { items: NavItem[]; brandName
                       </motion.div>
                     );
                   })}
+                  {!hasOssInNav && (
+                    <motion.div
+                      initial={reduce ? false : { opacity: 0, x: 12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.04 + items.length * 0.04, duration: 0.3 }}
+                    >
+                      <a
+                        href={OSS_URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={() => setOpen(false)}
+                        className="inline-flex items-center gap-1.5 px-4 py-2.5 font-mono text-[11px] uppercase tracking-[0.14em] text-primary"
+                      >
+                        Open Source
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
               </nav>
             </SheetContent>
