@@ -90,6 +90,13 @@ export default async function BlogDetailPage({
           chapterIndex="01"
           chapterLabel="ESSAY"
         >
+          <Breadcrumbs
+            items={[
+              { label: "Home", href: "/" },
+              { label: "Blog", href: "/blog" },
+              { label: post.title },
+            ]}
+          />
           <Link
             href="/blog"
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
